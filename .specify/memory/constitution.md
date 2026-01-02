@@ -1,55 +1,33 @@
-# [PROJECT_NAME] Constitution
-<!-- Example: Spec Constitution, TaskFlow Constitution, etc. -->
+# Todo CLI Application Constitution
 
 ## Core Principles
 
-### [PRINCIPLE_1_NAME]
-<!-- Example: I. Library-First -->
-[PRINCIPLE_1_DESCRIPTION]
-<!-- Example: Every feature starts as a standalone library; Libraries must be self-contained, independently testable, documented; Clear purpose required - no organizational-only libraries -->
+### I. Memory-First Storage
+Tasks are stored in memory during application runtime; No persistent storage mechanism is implemented initially. This ensures fast operations and simple implementation while acknowledging that tasks will be lost when the application terminates. Clear documentation must be provided to users about this limitation.
 
-### [PRINCIPLE_2_NAME]
-<!-- Example: II. CLI Interface -->
-[PRINCIPLE_2_DESCRIPTION]
-<!-- Example: Every library exposes functionality via CLI; Text in/out protocol: stdin/args → stdout, errors → stderr; Support JSON + human-readable formats -->
+### II. Command-Line Interface
+The application provides a text-based command-line interface; All operations are accessible through CLI commands; Input/output follows standard conventions: commands via arguments → results to stdout, errors to stderr; Both human-readable and structured (JSON) output formats are supported.
 
-### [PRINCIPLE_3_NAME]
-<!-- Example: III. Test-First (NON-NEGOTIABLE) -->
-[PRINCIPLE_3_DESCRIPTION]
-<!-- Example: TDD mandatory: Tests written → User approved → Tests fail → Then implement; Red-Green-Refactor cycle strictly enforced -->
+### III. Test-First (NON-NEGOTIABLE)
+TDD is mandatory: Tests are written before implementation → Tests fail initially → Implementation follows → Tests pass → Refactoring occurs; Red-Green-Refactor cycle is strictly enforced; All features must have test coverage before being considered complete.
 
-### [PRINCIPLE_4_NAME]
-<!-- Example: IV. Integration Testing -->
-[PRINCIPLE_4_DESCRIPTION]
-<!-- Example: Focus areas requiring integration tests: New library contract tests, Contract changes, Inter-service communication, Shared schemas -->
+### IV. Complete Task Management
+The application implements all five basic todo operations: Add (create new tasks), Delete (remove tasks), Update (modify task content), View (list tasks), Mark Complete (toggle task completion status); Each operation must be accessible through distinct CLI commands with clear user feedback.
 
-### [PRINCIPLE_5_NAME]
-<!-- Example: V. Observability, VI. Versioning & Breaking Changes, VII. Simplicity -->
-[PRINCIPLE_5_DESCRIPTION]
-<!-- Example: Text I/O ensures debuggability; Structured logging required; Or: MAJOR.MINOR.BUILD format; Or: Start simple, YAGNI principles -->
+### V. Clean Code and Readability
+Code follows clean code principles: Functions are single-purpose, classes have single responsibility, naming is clear and descriptive; Code is well-commented where not self-explanatory; Consistent formatting and structure are maintained throughout the project.
 
-### [PRINCIPLE_6_NAME]
+### VI. Minimal Dependencies
+The application uses minimal external dependencies to maintain simplicity and security; Only essential libraries are included; All dependencies are well-maintained and regularly updated.
 
+## Architecture & Structure
+The project follows a modular architecture with clear separation of concerns: Task model definition, CLI command handling, In-memory storage management, User interface/output formatting, Test organization mirroring source structure. File organization follows: src/ for source code, tests/ for test files, bin/ for executable files, docs/ for documentation.
 
-[PRINCIPLE__DESCRIPTION]
-
-## [SECTION_2_NAME]
-<!-- Example: Additional Constraints, Security Requirements, Performance Standards, etc. -->
-
-[SECTION_2_CONTENT]
-<!-- Example: Technology stack requirements, compliance standards, deployment policies, etc. -->
-
-## [SECTION_3_NAME]
-<!-- Example: Development Workflow, Review Process, Quality Gates, etc. -->
-
-[SECTION_3_CONTENT]
-<!-- Example: Code review requirements, testing gates, deployment approval process, etc. -->
+## Development Methodology
+Spec-driven and test-driven development guide all implementation: Features are specified before coding begins; Tests are written to validate specifications; Implementation follows test creation; Regular refactoring maintains code quality; All changes are validated against existing tests before merging.
 
 ## Governance
-<!-- Example: Constitution supersedes all other practices; Amendments require documentation, approval, migration plan -->
 
-[GOVERNANCE_RULES]
-<!-- Example: All PRs/reviews must verify compliance; Complexity must be justified; Use [GUIDANCE_FILE] for runtime development guidance -->
+This constitution governs all development practices for the Todo CLI Application. All pull requests and code reviews must verify compliance with these principles. Amendments to this constitution require documentation of changes, team approval, and an implementation migration plan when necessary. The constitution version follows semantic versioning: MAJOR for breaking changes, MINOR for additions, PATCH for clarifications.
 
-**Version**: [CONSTITUTION_VERSION] | **Ratified**: [RATIFICATION_DATE] | **Last Amended**: [LAST_AMENDED_DATE]
-<!-- Example: Version: 2.1.1 | Ratified: 2025-06-13 | Last Amended: 2025-07-16 -->
+**Version**: 1.0.0 | **Ratified**: 2025-12-31 | **Last Amended**: 2025-12-31
