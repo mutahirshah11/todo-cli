@@ -18,7 +18,11 @@ class TaskService:
             storage_file: Path to the temporary file for persistence.
                          Defaults to 'todo_data.json' in the current directory.
         """
-        self.storage_file = storage_file or "todo_data.json"
+        # Use storage file from environment variable if set, otherwise default
+        if storage_file is None:
+            self.storage_file = os.environ.get('TODO_STORAGE_FILE', os.path.join(os.path.expanduser("~"), ".todo_data.json"))
+        else:
+            self.storage_file = storage_file
         self.tasks: List[Task] = []
         self._load_from_file()
 
