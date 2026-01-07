@@ -18,6 +18,8 @@
   - Tested independently
   - Deployed independently
   - Demonstrated to users independently
+  
+  STRICT TDD REQUIRED: Every user story must have defined acceptance scenarios that will form the basis of automated tests.
 -->
 
 ### User Story 1 - [Brief Title] (Priority: P1)

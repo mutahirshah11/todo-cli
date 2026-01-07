@@ -1,33 +1,95 @@
-# Todo CLI Application Constitution
+<!--
+SYNC IMPACT REPORT
+Version: 2.1.0 (Minor Update: Simplicity + Fixes)
+Modified Principles:
+- Future-Proof Extensibility -> Option Value (Avoid Over-engineering)
+- User-Centric Privacy -> Added OWASP mandate
+- Governance -> Allowed Fix-Forward
+Added Sections:
+- Article V: Simplicity and Maintainability
+-->
+
+# Constitution of The Todo Project
+
+## Preamble
+
+We, the contributors and maintainers of The Todo Project, establish this Constitution to govern the development, operation, and evolution of a robust, multi-user task management ecosystem. This project serves as a foundational platform designed for reliability, security, and future extensibility, specifically anticipating the integration of advanced conversational interfaces. We commit to a development culture rooted in correctness, user privacy, and architectural foresight.
+
+## Objectives
+
+1.  **User Experience**: To provide a seamless, intuitive, and responsive interface that empowers users to manage their tasks efficiently across sessions.
+2.  **Security & Integrity**: To ensure that user data is isolated, protected, and stored with the highest standards of integrity, preventing unauthorized access or data corruption.
+3.  **Reliability**: To deliver a defect-free experience through rigorous verification standards, ensuring the system behaves exactly as specified under all conditions.
+4.  **Extensibility**: To architect the system today for the needs of tomorrow, specifically laying the groundwork for seamless AI agent integration (Phase III) without requiring fundamental rewrites.
 
 ## Core Principles
 
-### I. Memory-First Storage
-Tasks are stored in memory during application runtime; No persistent storage mechanism is implemented initially. This ensures fast operations and simple implementation while acknowledging that tasks will be lost when the application terminates. Clear documentation must be provided to users about this limitation.
+### Article I: Strict Test-Driven Development (TDD)
+**Principle**: *No Production Code Without Failing Tests.*
+**Rationale**: To guarantee correctness and prevent regression in a complex multi-user environment.
+**Directives**:
+1.  Development MUST strictly follow the Red-Green-Refactor cycle.
+2.  Tests MUST be written and fail before any implementation code is written.
+3.  Code coverage metrics SHOULD be used as a guide, but the primary metric is the existence of a specific test case for every behavioral requirement.
+4.  Pull requests without corresponding tests MUST be rejected.
 
-### II. Command-Line Interface
-The application provides a text-based command-line interface; All operations are accessible through CLI commands; Input/output follows standard conventions: commands via arguments → results to stdout, errors to stderr; Both human-readable and structured (JSON) output formats are supported.
+### Article II: User-Centric Privacy and Fairness
+**Principle**: *Data Isolation is Absolute.*
+**Rationale**: In a multi-user system, the leakage of one user’s data to another is a critical failure.
+**Directives**:
+1.  The system MUST enforce strict logical separation of user data at all architectural layers.
+2.  Authentication and Authorization mechanisms MUST be verified by negative testing scenarios.
+3.  Security implementation MUST adhere to established industry standards (e.g., OWASP Top 10) to prevent common vulnerabilities.
+4.  Fairness mechanisms MUST be implemented to ensure no single user can degrade the performance of the system for others (e.g., rate limiting, quota management).
 
-### III. Test-First (NON-NEGOTIABLE)
-TDD is mandatory: Tests are written before implementation → Tests fail initially → Implementation follows → Tests pass → Refactoring occurs; Red-Green-Refactor cycle is strictly enforced; All features must have test coverage before being considered complete.
+### Article III: Future-Proof Extensibility
+**Principle**: *Enable Option Value.*
+**Rationale**: To facilitate future AI integration without over-engineering or locking in premature abstractions today.
+**Directives**:
+1.  APIs MUST be designed with strict contracts and versioning to allow future machine interaction.
+2.  Business logic MUST be decoupled from presentation layers.
+3.  Architectural decisions MUST NOT introduce strict dependencies that block the future addition of conversational interfaces.
 
-### IV. Complete Task Management
-The application implements all five basic todo operations: Add (create new tasks), Delete (remove tasks), Update (modify task content), View (list tasks), Mark Complete (toggle task completion status); Each operation must be accessible through distinct CLI commands with clear user feedback.
+### Article IV: Data Integrity and Persistence
+**Principle**: *Data is Sacred.*
+**Rationale**: Users rely on the system to remember their intent. Data loss is unacceptable.
+**Directives**:
+1.  All state mutations MUST be transactional or effectively atomic.
+2.  The system MUST handle failures gracefully without leaving data in an inconsistent state.
+3.  Migration strategies MUST be tested to ensure data preservation during schema evolution.
 
-### V. Clean Code and Readability
-Code follows clean code principles: Functions are single-purpose, classes have single responsibility, naming is clear and descriptive; Code is well-commented where not self-explanatory; Consistent formatting and structure are maintained throughout the project.
-
-### VI. Minimal Dependencies
-The application uses minimal external dependencies to maintain simplicity and security; Only essential libraries are included; All dependencies are well-maintained and regularly updated.
-
-## Architecture & Structure
-The project follows a modular architecture with clear separation of concerns: Task model definition, CLI command handling, In-memory storage management, User interface/output formatting, Test organization mirroring source structure. File organization follows: src/ for source code, tests/ for test files, bin/ for executable files, docs/ for documentation.
-
-## Development Methodology
-Spec-driven and test-driven development guide all implementation: Features are specified before coding begins; Tests are written to validate specifications; Implementation follows test creation; Regular refactoring maintains code quality; All changes are validated against existing tests before merging.
+### Article V: Simplicity and Maintainability
+**Principle**: *The Simplest Solution That Works.*
+**Rationale**: Complexity is the enemy of reliability and security. TDD should drive design, not clutter it.
+**Directives**:
+1.  Implementations MUST solve the current requirement only; do not speculate on future features ("YAGNI").
+2.  Code SHOULD be readable and self-explanatory.
+3.  Refactoring steps in the TDD cycle MUST prioritize reducing complexity.
 
 ## Governance
 
-This constitution governs all development practices for the Todo CLI Application. All pull requests and code reviews must verify compliance with these principles. Amendments to this constitution require documentation of changes, team approval, and an implementation migration plan when necessary. The constitution version follows semantic versioning: MAJOR for breaking changes, MINOR for additions, PATCH for clarifications.
+### Article VI: Ownership and Compliance
+1.  **Compliance Review**: All code contributions are subject to a compliance review against this Constitution.
+2.  **Violation**: Any code found violating these principles (e.g., merging code without tests, hardcoding secrets) is considered a critical defect and MUST be immediately remediated (via revert or hotfix).
+3.  **Living Document**: This Constitution may be amended to reflect new learnings or changing project scope. Amendments require a formal proposal and consensus among maintainers.
 
-**Version**: 1.0.0 | **Ratified**: 2025-12-31 | **Last Amended**: 2025-12-31
+### Article VII: Versioning
+1.  The Constitution follows semantic versioning.
+2.  **MAJOR**: Fundamental changes to Core Principles or Preamble.
+3.  **MINOR**: Additions of new Articles or non-breaking clarifications.
+4.  **PATCH**: Typographical fixes or formatting changes.
+
+## Data and User Interaction
+
+### Article VIII: User Sovereignty
+1.  Users MUST have the ability to export their data.
+2.  Users MUST have the ability to delete their account and all associated data (Right to be Forgotten).
+3.  The system MUST NOT collect unnecessary telemetry without explicit user consent.
+
+## Compliance and Enforcement
+
+### Article IX: Enforcement
+1.  Automated pipelines (CI/CD) MUST be established to enforce TDD (by running tests) and Code Style.
+2.  Architecture Decision Records (ADR) MUST be created for any deviation from established patterns, requiring justification and approval.
+
+**Version**: 2.1.0 | **Ratified**: 2026-01-06 | **Last Amended**: 2026-01-06
