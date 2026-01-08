@@ -138,3 +138,20 @@ Thumbs.db
 *.log
 todo_data.json
 temp_todo.json
+
+# Node.js/JavaScript/TypeScript
+node_modules/
+dist/
+build/
+*.log
+.env*
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnp
+.pnp.js
+.next/
+out/
+coverage/
+.nyc_output/
+junit.xml
