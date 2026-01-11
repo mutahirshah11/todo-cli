@@ -34,9 +34,9 @@ export const TaskList: React.FC<TaskListProps> = ({
 
   return (
     <div className="space-y-3">
-      {filteredTasks.map(task => (
+      {filteredTasks.map((task, index) => (
         <TaskItem
-          key={task.id}
+          key={`${task.id}-${index}`}
           task={task}
           onToggle={onToggle || (() => {})}
           onDelete={onDelete || (() => {})}
