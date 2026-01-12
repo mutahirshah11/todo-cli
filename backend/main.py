@@ -1,9 +1,9 @@
 from fastapi import FastAPI
-from backend.api.routers import tasks
-from backend.api.config.settings import settings
-from backend.api.config.security import add_security_middleware
-from backend.api.middleware.request_size import RequestSizeLimitMiddleware
-from backend.api.middleware.correlation_id import CorrelationIdMiddleware
+from api.routers import tasks
+from api.config.settings import settings
+from api.config.security import add_security_middleware
+from api.middleware.request_size import RequestSizeLimitMiddleware
+from api.middleware.correlation_id import CorrelationIdMiddleware
 
 
 # Create FastAPI app instance

@@ -1,7 +1,7 @@
 from typing import List, Optional
-from src.todo_cli.services.task_service import TaskService
-from src.todo_cli.models.task import Task as CliTask
-from backend.api.models.task import TaskCreate, TaskUpdate, TaskToggle, TaskResponse
+from todo_cli.services.task_service import TaskService
+from todo_cli.models.task import Task as CliTask
+from api.models.task import TaskCreate, TaskUpdate, TaskToggle, TaskResponse
 
 
 class TaskAdapter:

@@ -4,7 +4,7 @@ import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { useStore } from '@/lib/store';
+import { useAuthContext } from '@/app/providers/auth-provider';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -13,7 +13,7 @@ import Link from 'next/link';
 import { toast } from 'sonner';
 
 const loginSchema = z.object({
-  username: z.string().min(1, 'Username is required'),
+  email: z.string().min(1, 'Email is required').email('Invalid email address'),
   password: z.string().min(1, 'Password is required'),
 });
 
@@ -21,34 +21,31 @@ type LoginFormValues = z.infer<typeof loginSchema>;
 
 export default function LoginPage() {
   const router = useRouter();
-  const { login, isLoading } = useStore();
+  const { login, isAuthenticated } = useAuthContext();
+
+  // Redirect if already authenticated
+  React.useEffect(() => {
+    if (isAuthenticated) {
+      router.push('/dashboard');
+    }
+  }, [isAuthenticated, router]);
 
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
-      username: '',
+      email: '',
       password: '',
     },
   });
 
   const onSubmit = async (data: LoginFormValues) => {
     try {
-      // In a real app, this would be an API call to authenticate the user
-      // For now, we'll simulate authentication by storing a dummy token and user
-      const dummyUser = {
-        id: '1',
-        username: data.username,
-      };
-
-      // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
-
-      login('dummy-token', dummyUser);
+      await login(data.email, data.password);
       toast.success('Logged in successfully!');
       router.push('/dashboard');
       router.refresh();
-    } catch (error) {
-      toast.error('Login failed. Please check your credentials.');
+    } catch (error: any) {
+      toast.error(error.message || 'Login failed. Please check your credentials.');
     }
   };
 
@@ -66,12 +63,12 @@ export default function LoginPage() {
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
               <FormField
                 control={form.control}
-                name="username"
+                name="email"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Username</FormLabel>
+                    <FormLabel>Email</FormLabel>
                     <FormControl>
-                      <Input placeholder="your_username" {...field} />
+                      <Input placeholder="your@email.com" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -95,16 +92,15 @@ export default function LoginPage() {
               <Button
                 type="submit"
                 className="w-full"
-                disabled={isLoading}
               >
-                {isLoading ? 'Signing in...' : 'Sign In'}
+                Sign In
               </Button>
             </form>
           </Form>
 
           <div className="mt-6 text-center text-sm">
             Don{'\''}t have an account?{' '}
-            <Link href="/register" className="text-primary hover:underline">
+            <Link href="/(auth)/register" className="text-primary hover:underline">
               Sign up
             </Link>
           </div>

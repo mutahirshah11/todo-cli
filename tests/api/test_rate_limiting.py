@@ -5,7 +5,7 @@ due to rate limiting affecting subsequent test runs.
 """
 import pytest
 from fastapi.testclient import TestClient
-from main import app
+from backend.main import app
 from backend.api.utils.auth import SECRET_KEY, ALGORITHM
 from jose import jwt
 from datetime import datetime, timedelta

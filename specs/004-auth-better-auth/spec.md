@@ -5,11 +5,18 @@
 **Status**: Draft
 **Input**: User description: "Create spec.md for Authentication and Authorization of the Todo Full-Stack Web Application With Better Auth Library"
 
+## Clarifications
+
+### Session 2026-01-11
+
+- Q: What should be the default JWT token expiration time and refresh strategy to balance security and user experience? → A: 1 hour access token with refresh token for extended sessions
+- Q: What password strength requirements should be enforced during user registration to ensure security? → A: Minimum 8 characters with mixed case, numbers, and special characters
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - User Registration and Account Creation (Priority: P1)
 
-As a new user, I want to register for an account using email and password so that I can securely access my personal todo tasks. I should be able to provide my email address and create a strong password that meets security requirements.
+As a new user, I want to register for an account using email and password so that I can securely access my personal todo tasks. I should be able to provide my email address and create a strong password that meets security requirements (minimum 8 characters with mixed case, numbers, and special characters).
 
 **Why this priority**: Account creation is the foundational step that enables all other functionality. Without this, users cannot access the todo application securely.
 
@@ -17,8 +24,8 @@ As a new user, I want to register for an account using email and password so tha
 
 **Acceptance Scenarios**:
 
-1. **Given** a visitor on the registration page, **When** they provide valid email and password that meet security requirements, **Then** a new account is created and they are authenticated with a valid session
-2. **Given** a visitor on the registration page, **When** they provide invalid email format or weak password, **Then** appropriate validation errors are shown without creating an account
+1. **Given** a visitor on the registration page, **When** they provide valid email and password that meets security requirements (minimum 8 characters with mixed case, numbers, and special characters), **Then** a new account is created and they are authenticated with a valid session
+2. **Given** a visitor on the registration page, **When** they provide invalid email format or weak password (less than 8 characters, missing mixed case, numbers, or special characters), **Then** appropriate validation errors are shown without creating an account
 
 ---
 
@@ -54,16 +61,17 @@ As an authenticated user, I want to only access my own tasks so that my personal
 
 ### User Story 4 - Token Expiration and Session Security (Priority: P2)
 
-As a security-conscious user, I want my authentication tokens to expire after a set period so that unauthorized access is minimized if my device is compromised.
+As a security-conscious user, I want my authentication tokens to expire after a set period (1 hour access tokens) with refresh capabilities so that unauthorized access is minimized if my device is compromised, while still allowing extended sessions when needed.
 
 **Why this priority**: This enhances security by implementing proper session management and reducing the window of vulnerability.
 
-**Independent Test**: Can be fully tested by verifying token expiration behavior, delivering enhanced security for user sessions.
+**Independent Test**: Can be fully tested by verifying token expiration behavior and refresh token functionality, delivering enhanced security for user sessions.
 
 **Acceptance Scenarios**:
 
-1. **Given** a user with a valid JWT token, **When** the token reaches its expiration time, **Then** subsequent requests return 401 Unauthorized requiring re-authentication
-2. **Given** a user with an expired token, **When** they attempt to access protected resources, **Then** they are redirected to the login page
+1. **Given** a user with a valid JWT access token, **When** the token reaches its 1-hour expiration time, **Then** subsequent requests return 401 Unauthorized requiring refresh or re-authentication
+2. **Given** a user with an expired access token but valid refresh token, **When** they attempt to access protected resources, **Then** the system automatically refreshes their access token seamlessly
+3. **Given** a user with an expired token, **When** they attempt to access protected resources without valid refresh token, **Then** they are redirected to the login page
 
 ---
 
@@ -90,7 +98,7 @@ As a security-conscious user, I want my authentication tokens to expire after a 
 - **FR-009**: System MUST provide structured JSON error responses for all authentication and authorization failures
 - **FR-010**: Backend MUST remain stateless regarding authentication, relying solely on JWT for user identity
 - **FR-011**: System MUST securely store JWT secret in environment variables accessible to both frontend and backend
-- **FR-012**: Authentication flows MUST validate email format and enforce password strength requirements
+- **FR-012**: Authentication flows MUST validate email format and enforce password strength requirements (minimum 8 characters with mixed case, numbers, and special characters)
 
 ### Key Entities
 
@@ -105,6 +113,6 @@ As a security-conscious user, I want my authentication tokens to expire after a 
 - **SC-001**: 100% of protected backend endpoints reject requests without valid JWT tokens with 401 Unauthorized status
 - **SC-002**: 100% of authenticated users can only access their own tasks, with attempts to access others returning 403 Forbidden
 - **SC-003**: User registration and sign-in flows complete successfully within 10 seconds under normal network conditions
-- **SC-004**: JWT tokens expire according to configured timeout (e.g., 24 hours) and require re-authentication
+- **SC-004**: JWT access tokens expire after 1 hour and can be refreshed using refresh tokens for extended sessions
 - **SC-005**: All authentication-related errors return structured JSON responses with appropriate error codes and messages
 - **SC-006**: Zero unauthorized access occurs between different user accounts under normal operating conditions

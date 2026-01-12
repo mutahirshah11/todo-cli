@@ -10,7 +10,7 @@ from datetime import datetime, timedelta
 from jose import jwt
 
 # Import the FastAPI app
-from main import app
+from backend.main import app
 from backend.api.utils.auth import SECRET_KEY, ALGORITHM
 
 # Create a test user token
