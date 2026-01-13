@@ -11,6 +11,8 @@ from api.models.error import ErrorResponse
 from api.services.task_adapter import TaskAdapter
 from ..utils.jwt_validator import get_current_user_id as get_current_user_id_from_token, verify_user_owns_resource
 from fastapi.security import HTTPBearer
+from ..database.session import get_db_session
+from sqlalchemy.ext.asyncio import AsyncSession
 
 security = HTTPBearer()
 
@@ -32,7 +34,11 @@ router = APIRouter()
 
 
 @router.get("/{user_id}/tasks", response_model=TaskListResponse)
-async def get_tasks(user_id: str, current_user_id: str = Depends(get_current_user_id_from_token_dep)):
+async def get_tasks(
+    user_id: str,
+    current_user_id: str = Depends(get_current_user_id_from_token_dep),
+    session=Depends(get_db_session)
+):
     """
     Get all tasks for a specific user.
 
@@ -46,14 +52,19 @@ async def get_tasks(user_id: str, current_user_id: str = Depends(get_current_use
     # Verify that the authenticated user is requesting their own tasks
     verify_user_owns_resource(current_user_id, user_id)
 
-    adapter = TaskAdapter(user_id=user_id)
-    tasks = adapter.get_all_tasks()
+    adapter = TaskAdapter(session=session, user_id=user_id)
+    tasks = await adapter.get_all_tasks()
 
     return TaskListResponse(tasks=tasks)
 
 
 @router.get("/{user_id}/tasks/{id}", response_model=TaskSingleResponse)
-async def get_task(user_id: str, id: int, current_user_id: str = Depends(get_current_user_id_from_token_dep)):
+async def get_task(
+    user_id: str,
+    id: int,
+    current_user_id: str = Depends(get_current_user_id_from_token_dep),
+    session: AsyncSession = Depends(get_db_session)
+):
     """
     Get details of a specific task.
 
@@ -71,8 +82,8 @@ async def get_task(user_id: str, id: int, current_user_id: str = Depends(get_cur
     # Verify that the authenticated user is requesting their own task
     verify_user_owns_resource(current_user_id, user_id)
 
-    adapter = TaskAdapter(user_id=user_id)
-    task = adapter.get_task_by_id(id)
+    adapter = TaskAdapter(session=session, user_id=user_id)
+    task = await adapter.get_task_by_id(str(id))  # Convert to string for UUID
 
     if not task:
         raise HTTPException(
@@ -87,7 +98,8 @@ async def get_task(user_id: str, id: int, current_user_id: str = Depends(get_cur
 async def create_task(
     user_id: str,
     task_create: TaskCreate,
-    current_user_id: str = Depends(get_current_user_id_from_token_dep)
+    current_user_id: str = Depends(get_current_user_id_from_token_dep),
+    session: AsyncSession = Depends(get_db_session)
 ):
     """
     Create a new task for the user.
@@ -103,8 +115,8 @@ async def create_task(
     # Verify that the authenticated user is creating tasks for themselves
     verify_user_owns_resource(current_user_id, user_id)
 
-    adapter = TaskAdapter(user_id=user_id)
-    task = adapter.create_task(task_create)
+    adapter = TaskAdapter(session=session, user_id=user_id)
+    task = await adapter.create_task(task_create)
 
     return TaskSingleResponse(task=task)
 
@@ -114,7 +126,8 @@ async def update_task(
     user_id: str,
     id: int,
     task_update: TaskUpdate,
-    current_user_id: str = Depends(get_current_user_id_from_token_dep)
+    current_user_id: str = Depends(get_current_user_id_from_token_dep),
+    session: AsyncSession = Depends(get_db_session)
 ):
     """
     Update an existing task.
@@ -134,8 +147,8 @@ async def update_task(
     # Verify that the authenticated user is updating their own task
     verify_user_owns_resource(current_user_id, user_id)
 
-    adapter = TaskAdapter(user_id=user_id)
-    task = adapter.update_task(id, task_update)
+    adapter = TaskAdapter(session=session, user_id=user_id)
+    task = await adapter.update_task(str(id), task_update)
 
     if not task:
         raise HTTPException(
@@ -147,7 +160,12 @@ async def update_task(
 
 
 @router.delete("/{user_id}/tasks/{id}", status_code=status.HTTP_204_NO_CONTENT)
-async def delete_task(user_id: str, id: int, current_user_id: str = Depends(get_current_user_id_from_token_dep)):
+async def delete_task(
+    user_id: str,
+    id: int,
+    current_user_id: str = Depends(get_current_user_id_from_token_dep),
+    session: AsyncSession = Depends(get_db_session)
+):
     """
     Delete a task.
 
@@ -162,8 +180,8 @@ async def delete_task(user_id: str, id: int, current_user_id: str = Depends(get_
     # Verify that the authenticated user is deleting their own task
     verify_user_owns_resource(current_user_id, user_id)
 
-    adapter = TaskAdapter(user_id=user_id)
-    success = adapter.delete_task(id)
+    adapter = TaskAdapter(session=session, user_id=user_id)
+    success = await adapter.delete_task(str(id))
 
     if not success:
         raise HTTPException(
@@ -177,7 +195,8 @@ async def toggle_task_completion(
     user_id: str,
     id: int,
     task_toggle: TaskToggle,
-    current_user_id: str = Depends(get_current_user_id_from_token_dep)
+    current_user_id: str = Depends(get_current_user_id_from_token_dep),
+    session: AsyncSession = Depends(get_db_session)
 ):
     """
     Toggle the completion status of a task.
@@ -197,8 +216,8 @@ async def toggle_task_completion(
     # Verify that the authenticated user is updating their own task
     verify_user_owns_resource(current_user_id, user_id)
 
-    adapter = TaskAdapter(user_id=user_id)
-    task = adapter.toggle_completion(id, task_toggle)
+    adapter = TaskAdapter(session=session, user_id=user_id)
+    task = await adapter.toggle_completion(str(id), task_toggle)
 
     if not task:
         raise HTTPException(

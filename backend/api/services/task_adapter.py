@@ -1,93 +1,108 @@
 from typing import List, Optional
-from todo_cli.services.task_service import TaskService
-from todo_cli.models.task import Task as CliTask
 from api.models.task import TaskCreate, TaskUpdate, TaskToggle, TaskResponse
+from api.repositories.task_repository import TaskRepository
+from api.repositories.user_repository import UserRepository
+from api.validation.task_validation import validate_task_create_model, validate_task_update_model, validate_task_toggle_model
+from datetime import datetime
 
 
 class TaskAdapter:
     """
-    Adapter service to bridge the API layer with the existing CLI TaskService.
-    This ensures the API uses the same business logic as the CLI while providing
-    the necessary transformations between API models and CLI models.
+    Adapter service to bridge the API layer with the database repositories.
+    This ensures the API uses the database for persistent storage while providing
+    the necessary transformations between API models and database models.
     """
 
-    def __init__(self, user_id: str):
-        self.service = TaskService(user_id=user_id)
+    def __init__(self, session, user_id: str):
+        self.task_repo = TaskRepository(session)
+        self.user_repo = UserRepository(session)
+        self.user_id = user_id
 
-    def get_all_tasks(self) -> List[TaskResponse]:
+    async def get_all_tasks(self) -> List[TaskResponse]:
         """Get all tasks for the user and convert to API response format."""
-        cli_tasks = self.service.get_all_tasks()
-        return [self._convert_cli_task_to_api_response(cli_task) for cli_task in cli_tasks]
+        db_tasks = await self.task_repo.get_tasks_by_user(self.user_id)
+        return [self._convert_db_task_to_api_response(db_task) for db_task in db_tasks]
 
-    def get_task_by_id(self, task_id: int) -> Optional[TaskResponse]:
+    async def get_task_by_id(self, task_id: str) -> Optional[TaskResponse]:
         """Get a specific task by ID and convert to API response format."""
-        cli_task = self.service.get_task_by_id(task_id)
-        if cli_task:
-            return self._convert_cli_task_to_api_response(cli_task)
-        return None
-
-    def create_task(self, task_create: TaskCreate) -> TaskResponse:
-        """Create a new task using the CLI service and convert to API response format."""
-        cli_task = self.service.add_task(
-            title=task_create.title,
-            description=task_create.description
-        )
-        # Update the completed status after creation since add_task always sets it to False
-        if task_create.completed:
-            cli_task = self.service.mark_complete(cli_task.id)
-        return self._convert_cli_task_to_api_response(cli_task)
-
-    def update_task(self, task_id: int, task_update: TaskUpdate) -> Optional[TaskResponse]:
-        """Update an existing task using the CLI service and convert to API response format."""
-        # Use the current task's title/description as defaults if not provided in update
-        current_task = self.service.get_task_by_id(task_id)
-        if not current_task:
+        # Verify ownership first
+        has_ownership = await self.task_repo.verify_task_ownership(task_id, self.user_id)
+        if not has_ownership:
             return None
 
-        # Use provided values or fall back to current values
-        title = task_update.title if task_update.title is not None else current_task.title
-        description = task_update.description if task_update.description is not None else current_task.description
+        db_task = await self.task_repo.get_task_by_id(task_id, self.user_id)
+        if db_task:
+            return self._convert_db_task_to_api_response(db_task)
+        return None
 
-        updated_cli_task = self.service.update_task(
+    async def create_task(self, task_create: TaskCreate) -> TaskResponse:
+        """Create a new task using the database repository and convert to API response format."""
+        # Validate the task creation request according to console app rules
+        validated_task_create = validate_task_create_model(task_create)
+
+        db_task = await self.task_repo.create_task(
+            title=validated_task_create.title,
+            description=validated_task_create.description,
+            is_completed=validated_task_create.completed,
+            user_id=self.user_id
+        )
+        return self._convert_db_task_to_api_response(db_task)
+
+    async def update_task(self, task_id: str, task_update: TaskUpdate) -> Optional[TaskResponse]:
+        """Update an existing task using the database repository and convert to API response format."""
+        # Verify ownership first
+        has_ownership = await self.task_repo.verify_task_ownership(task_id, self.user_id)
+        if not has_ownership:
+            return None
+
+        # Validate the task update request according to console app rules
+        validated_task_update = validate_task_update_model(task_update)
+
+        updated_db_task = await self.task_repo.update_task(
             task_id=task_id,
-            title=title,
-            description=description
+            user_id=self.user_id,
+            title=validated_task_update.title,
+            description=validated_task_update.description,
+            is_completed=validated_task_update.completed
         )
 
-        # Update completion status if provided in the update
-        if updated_cli_task and task_update.completed is not None:
-            if task_update.completed:
-                updated_cli_task = self.service.mark_complete(task_id)
-            else:
-                updated_cli_task = self.service.mark_incomplete(task_id)
-
-        if updated_cli_task:
-            return self._convert_cli_task_to_api_response(updated_cli_task)
+        if updated_db_task:
+            return self._convert_db_task_to_api_response(updated_db_task)
         return None
 
-    def delete_task(self, task_id: int) -> bool:
-        """Delete a task using the CLI service."""
-        return self.service.delete_task(task_id)
+    async def delete_task(self, task_id: str) -> bool:
+        """Delete a task using the database repository."""
+        # Verify ownership first
+        has_ownership = await self.task_repo.verify_task_ownership(task_id, self.user_id)
+        if not has_ownership:
+            return False
 
-    def toggle_completion(self, task_id: int, task_toggle: TaskToggle) -> Optional[TaskResponse]:
-        """Toggle completion status of a task using the CLI service."""
-        if task_toggle.completed:
-            cli_task = self.service.mark_complete(task_id)
-        else:
-            cli_task = self.service.mark_incomplete(task_id)
+        return await self.task_repo.delete_task(task_id, self.user_id)
 
-        if cli_task:
-            return self._convert_cli_task_to_api_response(cli_task)
+    async def toggle_completion(self, task_id: str, task_toggle: TaskToggle) -> Optional[TaskResponse]:
+        """Toggle completion status of a task using the database repository."""
+        # Verify ownership first
+        has_ownership = await self.task_repo.verify_task_ownership(task_id, self.user_id)
+        if not has_ownership:
+            return None
+
+        # Validate the task toggle request according to console app rules
+        validated_task_toggle = validate_task_toggle_model(task_toggle)
+
+        updated_db_task = await self.task_repo.toggle_task_completion(task_id, self.user_id, validated_task_toggle.completed)
+
+        if updated_db_task:
+            return self._convert_db_task_to_api_response(updated_db_task)
         return None
 
-    def _convert_cli_task_to_api_response(self, cli_task: CliTask) -> TaskResponse:
-        """Convert a CLI Task to an API TaskResponse."""
+    def _convert_db_task_to_api_response(self, db_task) -> TaskResponse:
+        """Convert a database Task to an API TaskResponse."""
         return TaskResponse(
-            id=cli_task.id,
-            title=cli_task.title,
-            description=cli_task.description,
-            completed=cli_task.completed,
-            created_at=cli_task.created_at,
-            updated_at=cli_task.updated_at,
-            user_id=cli_task.user_id
+            id=db_task.id,
+            title=db_task.title,
+            description=db_task.description,
+            completed=db_task.is_completed,
+            created_at=db_task.created_at,
+            updated_at=db_task.updated_at,
+            user_id=db_task.user_id
         )

@@ -4,6 +4,7 @@ from api.config.settings import settings
 from api.config.security import add_security_middleware
 from api.middleware.request_size import RequestSizeLimitMiddleware
 from api.middleware.correlation_id import CorrelationIdMiddleware
+from api.handlers.error_handlers import add_error_handlers
 
 
 # Create FastAPI app instance
@@ -20,6 +21,9 @@ add_security_middleware(app)
 
 # Include API routers
 app.include_router(tasks.router, prefix="/api/v1", tags=["tasks"])
+
+# Add error handlers
+add_error_handlers(app)
 
 @app.get("/")
 async def root():
