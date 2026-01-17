@@ -54,7 +54,7 @@ class TaskToggle(BaseModel):
 
 class TaskResponse(TaskBase):
     """Response model for a task with all fields."""
-    id: int
+    id: str
     completed: bool
     created_at: datetime
     updated_at: datetime

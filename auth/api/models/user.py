@@ -4,11 +4,20 @@ from datetime import datetime
 
 
 class UserBase(BaseModel):
+    name: str
     email: EmailStr
 
 
 class UserCreate(UserBase):
     password: str
+
+    @field_validator('name')
+    def validate_name(cls, v):
+        if not v or len(v.strip()) == 0:
+            raise ValueError('Name is required and cannot be empty')
+        if len(v) > 255:
+            raise ValueError('Name must not exceed 255 characters')
+        return v.strip()
 
     @field_validator('password')
     def validate_password(cls, v):
@@ -28,6 +37,7 @@ class UserCreate(UserBase):
 
 
 class UserUpdate(BaseModel):
+    name: Optional[str] = None
     email: Optional[EmailStr] = None
 
 

@@ -16,7 +16,7 @@ Initialize project structure and configure development environment for database 
 ### Tasks
 
 - [X] T001 Set up Neon PostgreSQL instance and get connection credentials
-- [X] T002 Create .env file with DATABASE_URL and JWT secret configuration
+- [X] T002 Create .env file with NEON_DATABASE_URL and JWT secret configuration
 - [X] T003 Install SQLModel, asyncpg, and alembic dependencies in backend
 - [X] T004 Set up Alembic for database migrations in backend directory
 - [X] T005 Configure backend to use environment variables for database connection

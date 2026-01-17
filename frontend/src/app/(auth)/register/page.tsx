@@ -14,12 +14,22 @@ import Link from 'next/link';
 import { toast } from 'sonner';
 
 const registerSchema = z.object({
+  name: z.string().min(1, 'Name is required').max(255, 'Name must be at most 255 characters'),
   email: z.string().min(1, 'Email is required').email('Invalid email address'),
   password: z.string().min(8, 'Password must be at least 8 characters'),
   confirmPassword: z.string().min(1, 'Please confirm your password'),
 }).refine((data) => data.password === data.confirmPassword, {
   message: "Passwords don't match",
   path: ['confirmPassword'],
+}).refine((data) => {
+  const hasUpper = /[A-Z]/.test(data.password);
+  const hasLower = /[a-z]/.test(data.password);
+  const hasDigit = /\d/.test(data.password);
+  const hasSpecial = /[^A-Za-z0-9]/.test(data.password);
+  return hasUpper && hasLower && hasDigit && hasSpecial;
+}, {
+  message: "Password must contain uppercase, lowercase, numbers, and special characters",
+  path: ['password'],
 });
 
 type RegisterFormValues = z.infer<typeof registerSchema>;
@@ -38,6 +48,7 @@ export default function RegisterPage() {
   const form = useForm<RegisterFormValues>({
     resolver: zodResolver(registerSchema),
     defaultValues: {
+      name: '',
       email: '',
       password: '',
       confirmPassword: '',
@@ -46,10 +57,9 @@ export default function RegisterPage() {
 
   const onSubmit = async (data: RegisterFormValues) => {
     try {
-      await register(data.email, data.password);
+      await register(data.name, data.email, data.password);
       toast.success('Account created successfully!');
       router.push('/dashboard');
-      router.refresh();
     } catch (error: any) {
       toast.error(error.message || 'Registration failed. Please try again.');
     }
@@ -67,6 +77,20 @@ export default function RegisterPage() {
         <CardContent>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              <FormField
+                control={form.control}
+                name="name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Full Name</FormLabel>
+                    <FormControl>
+                      <Input type="text" placeholder="Enter your full name" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
               <FormField
                 control={form.control}
                 name="email"
@@ -120,7 +144,7 @@ export default function RegisterPage() {
 
           <div className="mt-6 text-center text-sm">
             Already have an account?{' '}
-            <Link href="/(auth)/login" className="text-primary hover:underline">
+            <Link href="/login" className="text-primary hover:underline">
               Sign in
             </Link>
           </div>

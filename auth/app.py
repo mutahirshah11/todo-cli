@@ -30,3 +30,10 @@ async def root():
 @app.get("/health")
 async def health_check():
     return {"status": "healthy"}
+
+@app.on_event("startup")
+async def startup_event():
+    """Startup event that runs when the application starts."""
+    print("Authentication service started successfully")
+    print("Ready for user registration and authentication")
+    # No demo user creation - users must register themselves

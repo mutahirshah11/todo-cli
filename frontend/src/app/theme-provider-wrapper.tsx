@@ -1,6 +1,7 @@
 'use client';
 
 import { ThemeProvider } from '@/app/providers';
+import { AuthProvider } from '@/app/providers/auth-provider';
 import { Navbar } from '@/components/feature/Navbar';
 import { Toaster } from 'sonner';
 
@@ -16,9 +17,11 @@ export default function ThemeProviderWrapper({ children }: ThemeProviderWrapperP
       enableSystem
       disableTransitionOnChange
     >
-      <Navbar />
-      <main>{children}</main>
-      <Toaster />
+      <AuthProvider>
+        <Navbar />
+        <main>{children}</main>
+        <Toaster />
+      </AuthProvider>
     </ThemeProvider>
   );
 }

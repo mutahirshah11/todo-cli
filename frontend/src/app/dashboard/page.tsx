@@ -19,7 +19,8 @@ export default function DashboardPage() {
     fetchTasks,
     toggleTask,
     deleteTask,
-    isAuthenticated
+    isAuthenticated,
+    user
   } = useStore();
   const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -62,7 +63,10 @@ export default function DashboardPage() {
   return (
     <div className="container mx-auto py-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-        <h1 className="text-3xl font-bold">Dashboard</h1>
+        <div>
+          <h1 className="text-3xl font-bold">Dashboard</h1>
+          <p className="text-muted-foreground">Welcome back, {user?.name}!</p>
+        </div>
         <Link href="/create">
           <Button>
             <Plus className="mr-2 h-4 w-4" />

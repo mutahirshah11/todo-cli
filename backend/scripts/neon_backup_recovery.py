@@ -25,11 +25,11 @@ class NeonBackupRecovery:
         Initialize the backup and recovery handler.
 
         Args:
-            database_url: PostgreSQL database URL. If not provided, uses DATABASE_URL environment variable.
+            database_url: PostgreSQL database URL. If not provided, uses NEON_DATABASE_URL environment variable.
         """
-        self.database_url = database_url or os.getenv("DATABASE_URL")
+        self.database_url = database_url or os.getenv("NEON_DATABASE_URL")
         if not self.database_url:
-            raise ValueError("DATABASE_URL must be provided either as parameter or environment variable")
+            raise ValueError("NEON_DATABASE_URL must be provided either as parameter or environment variable")
 
         # Parse database URL to extract components
         from urllib.parse import urlparse

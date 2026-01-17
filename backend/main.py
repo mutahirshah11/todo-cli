@@ -1,3 +1,9 @@
+import os
+import dotenv
+
+# Load environment variables from .env file FIRST before other imports
+dotenv.load_dotenv()
+
 from fastapi import FastAPI
 from api.routers import tasks
 from api.config.settings import settings

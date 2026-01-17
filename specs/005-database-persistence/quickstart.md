@@ -13,7 +13,7 @@
 ### Environment Configuration
 Create a `.env` file in the backend directory with:
 ```bash
-DATABASE_URL="postgresql://username:password@ep-xxx.us-east-1.aws.neon.tech/neondb?sslmode=require"
+NEON_DATABASE_URL="postgresql://username:password@ep-xxx.us-east-1.aws.neon.tech/neondb?sslmode=require"
 SECRET_KEY="your-jwt-secret-key-matching-auth-service"
 ALGORITHM="HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES=60
@@ -61,10 +61,10 @@ from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import sessionmaker
 import os
 
-DATABASE_URL = os.getenv("DATABASE_URL")
+NEON_DATABASE_URL = os.getenv("NEON_DATABASE_URL")
 
 # Async engine for FastAPI
-async_engine = create_async_engine(DATABASE_URL)
+async_engine = create_async_engine(NEON_DATABASE_URL)
 
 # Async session maker
 AsyncSessionLocal = sessionmaker(
@@ -155,7 +155,7 @@ class TaskRepository:
 ```bash
 # Run from backend directory
 alembic init alembic
-# Configure alembic.ini with your DATABASE_URL
+# Configure alembic.ini with your NEON_DATABASE_URL
 alembic revision --autogenerate -m "Initial database schema"
 alembic upgrade head
 ```
@@ -213,7 +213,7 @@ curl -X GET http://localhost:8000/api/v1/user-uuid/tasks \
 ## Troubleshooting
 
 ### Common Issues
-1. **Database Connection Errors**: Verify DATABASE_URL in .env file
+1. **Database Connection Errors**: Verify NEON_DATABASE_URL in .env file
 2. **JWT Validation Errors**: Ensure SECRET_KEY matches the auth service
 3. **User Access Errors**: Verify that the user_id in JWT matches the path parameter
 

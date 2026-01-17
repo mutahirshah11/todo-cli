@@ -31,9 +31,9 @@ async def test_user_story_1_persistent_task_storage():
     print("Testing User Story 1: Persistent Task Storage...")
 
     # Get database URL
-    database_url = os.getenv("DATABASE_URL")
+    database_url = os.getenv("NEON_DATABASE_URL")
     if not database_url:
-        pytest.skip("DATABASE_URL not set")
+        pytest.skip("NEON_DATABASE_URL not set")
 
     # Create async engine and session
     async_engine = create_async_engine(database_url)
@@ -103,9 +103,9 @@ async def test_user_story_2_user_task_ownership():
     print("\nTesting User Story 2: User-Task Ownership...")
 
     # Get database URL
-    database_url = os.getenv("DATABASE_URL")
+    database_url = os.getenv("NEON_DATABASE_URL")
     if not database_url:
-        pytest.skip("DATABASE_URL not set")
+        pytest.skip("NEON_DATABASE_URL not set")
 
     # Create async engine and session
     async_engine = create_async_engine(database_url)
@@ -219,9 +219,9 @@ async def test_user_story_3_consistent_behavior():
     print("\nTesting User Story 3: Consistent Task Behavior...")
 
     # Get database URL
-    database_url = os.getenv("DATABASE_URL")
+    database_url = os.getenv("NEON_DATABASE_URL")
     if not database_url:
-        pytest.skip("DATABASE_URL not set")
+        pytest.skip("NEON_DATABASE_URL not set")
 
     # Create async engine and session
     async_engine = create_async_engine(database_url)
@@ -318,9 +318,9 @@ async def test_performance_requirements():
     print("\nTesting Performance Requirements...")
 
     # Get database URL
-    database_url = os.getenv("DATABASE_URL")
+    database_url = os.getenv("NEON_DATABASE_URL")
     if not database_url:
-        pytest.skip("DATABASE_URL not set")
+        pytest.skip("NEON_DATABASE_URL not set")
 
     # Create async engine and session
     async_engine = create_async_engine(database_url)

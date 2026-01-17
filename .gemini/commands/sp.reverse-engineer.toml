@@ -1153,7 +1153,7 @@ from sqlalchemy import create_engine, pool
 
 # Connection pool configuration
 engine = create_engine(
-    DATABASE_URL,
+    NEON_DATABASE_URL,
     poolclass=pool.QueuePool,
     pool_size=10,              # Max connections in pool
     max_overflow=20,           # Additional connections beyond pool_size

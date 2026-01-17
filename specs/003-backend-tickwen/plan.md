@@ -221,7 +221,7 @@ For each endpoint, implement in this order:
 - [ ] Define `JWT_ALGORITHM` for token encoding
 - [ ] Define `ACCESS_TOKEN_EXPIRE_MINUTES` for token expiration
 - [ ] Define `LOG_LEVEL` for application logging
-- [ ] Define `DATABASE_URL` for future database connection
+- [ ] Define `NEON_DATABASE_URL` for future database connection
 
 ### Project Structure Setup
 - [ ] Create `src/api/` directory for FastAPI application

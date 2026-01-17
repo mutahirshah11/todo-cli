@@ -3,84 +3,118 @@ from typing import Optional
 from fastapi import HTTPException, status
 import uuid
 from datetime import datetime
+import os
+from sqlmodel import SQLModel, create_engine, Session, select
+from sqlalchemy.exc import IntegrityError
 
-from ..models.user import UserCreate, UserInDB, UserPublic
+from ..models.auth_user import AuthUser
+from ..models.user import UserCreate, UserPublic
 from ..utils.jwt import get_password_hash, verify_password, create_access_token
 from ..exceptions.auth_exceptions import UserAlreadyExistsException, InvalidCredentialsException
 
 
-class MockUserService:
+class DatabaseUserService:
     """
-    Mock user service for demonstration purposes.
-    In a real implementation, this would interact with a database.
+    Database-backed user service.
+    Interacts with the shared database using SQLModel.
     """
 
     def __init__(self):
-        self.users_db = {}  # In-memory storage for demo
-        # Add demo credentials for temporary use
-        self._add_demo_user()
+        # Get database URL from environment
+        database_url = os.getenv("NEON_DATABASE_URL")
+        if not database_url:
+            raise ValueError("NEON_DATABASE_URL environment variable not set")
 
-    def _add_demo_user(self):
-        """Add a demo user for temporary access until database integration."""
-        from ..utils.jwt import get_password_hash
-        import uuid
-        from datetime import datetime
+        # Create sync engine for auth service
+        self.engine = create_engine(database_url, pool_pre_ping=True)
 
-        demo_user_id = "demo-user-123"
-        demo_email = "demo@example.com"
-        demo_password = "DemoPass123!"
-        demo_password_hash = get_password_hash(demo_password)
+        # Create tables if they don't exist
+        SQLModel.metadata.create_all(self.engine)
 
-        demo_user = UserInDB(
-            id=demo_user_id,
-            email=demo_email,
-            password_hash=demo_password_hash,
-            created_at=datetime.utcnow(),
-            updated_at=datetime.utcnow(),
-            is_active=True
-        )
+        # Ensure the name column exists in the auth_users table
+        self._ensure_name_column_exists()
 
-        self.users_db[demo_user_id] = demo_user
-        print(f"Demo user created: {demo_email}")
-        print(f"Demo credentials - Email: {demo_email}, Password: {demo_password}")
+    def _ensure_name_column_exists(self):
+        """Ensure the name column exists in the auth_users table."""
+        from sqlalchemy import inspect, text
 
-    def get_user_by_email(self, email: str) -> Optional[UserInDB]:
+        try:
+            inspector = inspect(self.engine)
+            columns = [col['name'] for col in inspector.get_columns('auth_users')]
+
+            if 'name' not in columns:
+                # Add the name column to the table
+                with self.engine.connect() as conn:
+                    # Add the name column with a default value
+                    conn.execute(text("ALTER TABLE auth_users ADD COLUMN name VARCHAR(255) DEFAULT '' NOT NULL"))
+                    conn.commit()
+        except Exception as e:
+            # If the table doesn't exist yet, it will be created with the name column
+            # when SQLModel.metadata.create_all() is called
+            pass
+
+    def get_user_by_email(self, email: str) -> Optional[AuthUser]:
         """Get a user by email."""
-        for user in self.users_db.values():
-            if user.email == email:
-                return user
-        return None
+        with Session(self.engine) as session:
+            statement = select(AuthUser).where(AuthUser.email == email)
+            user = session.exec(statement).first()
 
-    def get_user_by_id(self, user_id: str) -> Optional[UserInDB]:
+            # Handle case where name might be None for existing users
+            if user and not user.name:
+                user.name = user.email.split('@')[0]  # Use part of email as default name
+                # Update the user in the database
+                session.add(user)
+                session.commit()
+
+            return user
+
+    def get_user_by_id(self, user_id: str) -> Optional[AuthUser]:
         """Get a user by ID."""
-        return self.users_db.get(user_id)
+        with Session(self.engine) as session:
+            statement = select(AuthUser).where(AuthUser.user_id == user_id)
+            user = session.exec(statement).first()
 
-    def create_user(self, user_create: UserCreate) -> UserInDB:
+            # Handle case where name might be None for existing users
+            if user and not user.name:
+                user.name = user.email.split('@')[0]  # Use part of email as default name
+                # Update the user in the database
+                session.add(user)
+                session.commit()
+
+            return user
+
+    def create_user(self, user_create: UserCreate) -> AuthUser:
         """Create a new user."""
-        # Check if user already exists
-        existing_user = self.get_user_by_email(user_create.email)
-        if existing_user:
-            raise UserAlreadyExistsException(f"User with email {user_create.email} already exists")
+        with Session(self.engine) as session:
+            # Check if user already exists
+            existing_user = self.get_user_by_email(user_create.email)
+            if existing_user:
+                raise UserAlreadyExistsException(f"User with email {user_create.email} already exists")
 
-        # Create new user
-        user_id = str(uuid.uuid4())
-        password_hash = get_password_hash(user_create.password)
-        user = UserInDB(
-            id=user_id,
-            email=user_create.email,
-            password_hash=password_hash,
-            created_at=datetime.utcnow(),
-            updated_at=datetime.utcnow(),
-            is_active=True
-        )
+            # Create new user
+            user_id = str(uuid.uuid4())
+            password_hash = get_password_hash(user_create.password)
 
-        self.users_db[user_id] = user
-        return user
+            user = AuthUser(
+                user_id=user_id,
+                name=user_create.name,
+                email=user_create.email,
+                password_hash=password_hash,
+                created_at=datetime.utcnow(),
+                updated_at=datetime.utcnow(),
+                is_active=True
+            )
+
+            session.add(user)
+            session.commit()
+            session.refresh(user)
+
+            return user
 
 
 class AuthService:
     def __init__(self):
-        self.user_service = MockUserService()
+        self.user_service = DatabaseUserService()
 
     def register_user(self, user_create: UserCreate) -> tuple[UserPublic, str]:
         """Register a new user and return user data with access token."""
@@ -88,12 +122,13 @@ class AuthService:
         user_in_db = self.user_service.create_user(user_create)
 
         # Create access token
-        token_data = {"sub": user_in_db.id, "email": user_in_db.email}
+        token_data = {"sub": user_in_db.user_id, "email": user_in_db.email}
         access_token = create_access_token(data=token_data)
 
         # Convert to public user model
         user_public = UserPublic(
-            id=user_in_db.id,
+            id=user_in_db.user_id,
+            name=user_in_db.name,
             email=user_in_db.email,
             created_at=user_in_db.created_at,
             updated_at=user_in_db.updated_at,
@@ -104,21 +139,30 @@ class AuthService:
 
     def authenticate_user(self, email: str, password: str) -> tuple[UserPublic, str]:
         """Authenticate user and return user data with access token."""
+        # Ensure email is stripped of whitespace
+        email = email.strip()
+        
         user = self.user_service.get_user_by_email(email)
 
-        if not user or not verify_password(password, user.password_hash):
+        if not user:
+            print(f"Authentication failed: User not found for email {email}")
+            raise InvalidCredentialsException("Invalid email or password")
+            
+        if not verify_password(password, user.password_hash):
+            print(f"Authentication failed: Invalid password for user {email}")
             raise InvalidCredentialsException("Invalid email or password")
 
         if not user.is_active:
             raise InvalidCredentialsException("User account is deactivated")
 
         # Create access token
-        token_data = {"sub": user.id, "email": user.email}
+        token_data = {"sub": user.user_id, "email": user.email}
         access_token = create_access_token(data=token_data)
 
         # Convert to public user model
         user_public = UserPublic(
-            id=user.id,
+            id=user.user_id,
+            name=user.name,
             email=user.email,
             created_at=user.created_at,
             updated_at=user.updated_at,
@@ -150,7 +194,8 @@ class AuthService:
             )
 
         user_public = UserPublic(
-            id=user.id,
+            id=user.user_id,
+            name=user.name,
             email=user.email,
             created_at=user.created_at,
             updated_at=user.updated_at,
@@ -179,7 +224,8 @@ class AuthService:
             )
 
         user_public = UserPublic(
-            id=user.id,
+            id=user.user_id,
+            name=user.name,
             email=user.email,
             created_at=user.created_at,
             updated_at=user.updated_at,

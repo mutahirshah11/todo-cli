@@ -13,11 +13,9 @@
 
 ### Task Management Endpoints
 
-#### GET /api/v1/{user_id}/tasks
+#### GET /api/v1/tasks
 - **Purpose**: Retrieve all tasks for authenticated user
 - **Method**: GET
-- **Path Parameters**:
-  - `user_id`: UUID from JWT token
 - **Headers**:
   - `Authorization: Bearer <token>`
 - **Query Parameters**:
@@ -27,28 +25,23 @@
 - **Response**: 200 OK with array of Task objects
 - **Error Responses**:
   - 401 Unauthorized (invalid JWT)
-  - 403 Forbidden (user_id mismatch)
   - 404 Not Found (user does not exist)
 
-#### GET /api/v1/{user_id}/tasks/{id}
+#### GET /api/v1/tasks/{id}
 - **Purpose**: Retrieve specific task for authenticated user
 - **Method**: GET
 - **Path Parameters**:
-  - `user_id`: UUID from JWT token
   - `id`: Task ID to retrieve
 - **Headers**:
   - `Authorization: Bearer <token>`
 - **Response**: 200 OK with single Task object
 - **Error Responses**:
   - 401 Unauthorized (invalid JWT)
-  - 403 Forbidden (user_id mismatch)
   - 404 Not Found (task not found)
 
-#### POST /api/v1/{user_id}/tasks
+#### POST /api/v1/tasks
 - **Purpose**: Create new task for authenticated user
 - **Method**: POST
-- **Path Parameters**:
-  - `user_id`: UUID from JWT token
 - **Headers**:
   - `Authorization: Bearer <token>`
   - `Content-Type: application/json`
@@ -64,13 +57,11 @@
 - **Error Responses**:
   - 400 Bad Request (validation errors)
   - 401 Unauthorized (invalid JWT)
-  - 403 Forbidden (user_id mismatch)
 
-#### PUT /api/v1/{user_id}/tasks/{id}
+#### PUT /api/v1/tasks/{id}
 - **Purpose**: Update existing task for authenticated user
 - **Method**: PUT
 - **Path Parameters**:
-  - `user_id`: UUID from JWT token
   - `id`: Task ID to update
 - **Headers**:
   - `Authorization: Bearer <token>`
@@ -87,14 +78,12 @@
 - **Error Responses**:
   - 400 Bad Request (validation errors)
   - 401 Unauthorized (invalid JWT)
-  - 403 Forbidden (user_id mismatch)
   - 404 Not Found (task not found)
 
-#### PATCH /api/v1/{user_id}/tasks/{id}/complete
+#### PATCH /api/v1/tasks/{id}/complete
 - **Purpose**: Toggle completion status of task
 - **Method**: PATCH
 - **Path Parameters**:
-  - `user_id`: UUID from JWT token
   - `id`: Task ID to update
 - **Headers**:
   - `Authorization: Bearer <token>`
@@ -109,21 +98,18 @@
 - **Error Responses**:
   - 400 Bad Request (validation errors)
   - 401 Unauthorized (invalid JWT)
-  - 403 Forbidden (user_id mismatch)
   - 404 Not Found (task not found)
 
-#### DELETE /api/v1/{user_id}/tasks/{id}
+#### DELETE /api/v1/tasks/{id}
 - **Purpose**: Delete task for authenticated user
 - **Method**: DELETE
 - **Path Parameters**:
-  - `user_id`: UUID from JWT token
   - `id`: Task ID to delete
 - **Headers**:
   - `Authorization: Bearer <token>`
 - **Response**: 204 No Content
 - **Error Responses**:
   - 401 Unauthorized (invalid JWT)
-  - 403 Forbidden (user_id mismatch)
   - 404 Not Found (task not found)
 
 ## Database Schema Contracts
@@ -172,9 +158,8 @@ CREATE INDEX idx_tasks_created_at ON tasks(created_at);
 
 ### Authorization Validation
 - All endpoints require valid JWT token in Authorization header
-- Token user_id must match the user_id in the path
+- User identity is extracted from the JWT token (no user_id in URL path)
 - Invalid tokens return 401 Unauthorized
-- Mismatched user_id returns 403 Forbidden
 - Non-existent resources return 404 Not Found (no information leak)
 
 ## Error Response Format

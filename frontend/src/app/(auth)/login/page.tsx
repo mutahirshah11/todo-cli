@@ -43,7 +43,6 @@ export default function LoginPage() {
       await login(data.email, data.password);
       toast.success('Logged in successfully!');
       router.push('/dashboard');
-      router.refresh();
     } catch (error: any) {
       toast.error(error.message || 'Login failed. Please check your credentials.');
     }
@@ -100,7 +99,7 @@ export default function LoginPage() {
 
           <div className="mt-6 text-center text-sm">
             Don{'\''}t have an account?{' '}
-            <Link href="/(auth)/register" className="text-primary hover:underline">
+            <Link href="/register" className="text-primary hover:underline">
               Sign up
             </Link>
           </div>

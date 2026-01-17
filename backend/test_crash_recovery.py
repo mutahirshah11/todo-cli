@@ -34,9 +34,9 @@ async def test_crash_recovery_scenario():
     print("Testing crash recovery scenario...")
 
     # Get database URL
-    database_url = os.getenv("DATABASE_URL")
+    database_url = os.getenv("NEON_DATABASE_URL")
     if not database_url:
-        print("ERROR: DATABASE_URL environment variable not set")
+        print("ERROR: NEON_DATABASE_URL environment variable not set")
         return False
 
     # Create async engine and session
@@ -135,7 +135,7 @@ async def test_connection_recovery():
     from api.database.session import DatabaseErrorHandler
 
     # Test the retry mechanism by attempting a connection
-    async_engine = create_async_engine(os.getenv("DATABASE_URL"))
+    async_engine = create_async_engine(os.getenv("NEON_DATABASE_URL"))
 
     try:
         # Try to establish a connection using the error handler

@@ -14,6 +14,7 @@ class TaskAdapter:
     """
 
     def __init__(self, session, user_id: str):
+        self.session = session
         self.task_repo = TaskRepository(session)
         self.user_repo = UserRepository(session)
         self.user_id = user_id
@@ -37,6 +38,9 @@ class TaskAdapter:
 
     async def create_task(self, task_create: TaskCreate) -> TaskResponse:
         """Create a new task using the database repository and convert to API response format."""
+        # Ensure the user exists in the backend database before creating the task
+        await self._ensure_user_exists()
+
         # Validate the task creation request according to console app rules
         validated_task_create = validate_task_create_model(task_create)
 
@@ -47,6 +51,28 @@ class TaskAdapter:
             user_id=self.user_id
         )
         return self._convert_db_task_to_api_response(db_task)
+
+    async def _ensure_user_exists(self):
+        """Ensure the user exists in the backend database, create if not."""
+        # Check if user exists in backend database
+        user_exists = await self.user_repo.user_exists(self.user_id)
+
+        if not user_exists:
+            # Create a minimal user record in the backend database with the specific user_id
+            # Since we don't have the user's name and email here, we'll use a placeholder
+            # In a real scenario, you'd want to fetch this from the auth service
+            try:
+                # Create a new user with the specific user_id
+                db_user = await self.user_repo.create_user_if_not_exists(
+                    user_id=self.user_id,
+                    name=f"User_{self.user_id[:8]}",  # Take first 8 chars of user_id as name
+                    email=f"{self.user_id}@placeholder.com"  # Placeholder email
+                )
+            except Exception as e:
+                # Log the error but continue with the task creation
+                print(f"Warning: Could not create user in backend: {e}")
+                # Re-raise to ensure we don't create a task for a non-existent user
+                raise
 
     async def update_task(self, task_id: str, task_update: TaskUpdate) -> Optional[TaskResponse]:
         """Update an existing task using the database repository and convert to API response format."""

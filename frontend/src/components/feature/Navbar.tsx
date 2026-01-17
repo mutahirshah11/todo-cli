@@ -1,10 +1,10 @@
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
-import { useStore } from '@/lib/store';
+import { useAuthContext } from '@/app/providers/auth-provider';
 
 export function Navbar() {
-  const { user, logout, isAuthenticated } = useStore();
+  const { user, logout, isAuthenticated } = useAuthContext();
 
   const handleLogout = () => {
     logout();
@@ -22,9 +22,9 @@ export function Navbar() {
         <div className="flex items-center gap-4">
           <ThemeToggle />
 
-          {isAuthenticated() ? (
+          {isAuthenticated ? (
             <div className="flex items-center gap-2">
-              <span className="text-sm">Welcome, {user?.username}</span>
+              <span className="text-sm">Welcome, {user?.name || user?.email}</span>
               <Button variant="outline" size="sm" onClick={handleLogout}>
                 Logout
               </Button>

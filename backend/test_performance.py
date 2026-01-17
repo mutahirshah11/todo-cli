@@ -32,9 +32,9 @@ async def test_performance_with_large_dataset(num_tasks=10000, batch_size=1000):
     print(f"Testing performance with {num_tasks} tasks per user...")
 
     # Get database URL
-    database_url = os.getenv("DATABASE_URL")
+    database_url = os.getenv("NEON_DATABASE_URL")
     if not database_url:
-        print("ERROR: DATABASE_URL environment variable not set")
+        print("ERROR: NEON_DATABASE_URL environment variable not set")
         return False
 
     # Create async engine and session
@@ -176,9 +176,9 @@ async def test_specific_performance_scenarios():
     print("\nTesting specific performance scenarios...")
 
     # Get database URL
-    database_url = os.getenv("DATABASE_URL")
+    database_url = os.getenv("NEON_DATABASE_URL")
     if not database_url:
-        print("ERROR: DATABASE_URL environment variable not set")
+        print("ERROR: NEON_DATABASE_URL environment variable not set")
         return False
 
     # Create async engine and session

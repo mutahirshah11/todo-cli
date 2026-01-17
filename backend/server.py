@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Start the standalone Authentication Service
+Start the Backend Service
 """
 
 import os
@@ -13,19 +13,18 @@ import argparse
 
 
 def main():
-    parser = argparse.ArgumentParser(description='Start the Authentication Service')
+    parser = argparse.ArgumentParser(description='Start the Backend Service')
     parser.add_argument('--host', default='0.0.0.0', help='Host to bind to (default: 0.0.0.0)')
-    parser.add_argument('--port', type=int, default=8001, help='Port to bind to (default: 8001)')
+    parser.add_argument('--port', type=int, default=8000, help='Port to bind to (default: 8000)')
     parser.add_argument('--reload', action='store_true', help='Enable auto-reload (development)')
 
     args = parser.parse_args()
 
-    print("Starting Authentication Service...")
-    print("No demo users will be created - users must register themselves")
+    print("Starting Backend Service on port 8000...")
 
     # Start the Uvicorn server
     uvicorn.run(
-        "app:app",
+        "main:app",
         host=args.host,
         port=args.port,
         reload=args.reload,

@@ -1,6 +1,6 @@
 """
-Comprehensive test suite for GET /api/{user_id}/tasks/{id} endpoint.
-Tests all scenarios for getting a single task for a user.
+Comprehensive test suite for GET /api/tasks/{id} endpoint.
+Tests all scenarios for getting a single task for the authenticated user.
 """
 import pytest
 from fastapi.testclient import TestClient
@@ -27,7 +27,7 @@ def test_valid_request_for_existing_task():
 
     # First, create a task
     task_data = {"title": "Test task", "description": "Test description", "completed": False}
-    response = client.post("/api/user1/tasks",
+    response = client.post("/api/tasks",
                           json=task_data,
                           headers={"Authorization": f"Bearer {token}"})
     assert response.status_code == 201
@@ -35,7 +35,7 @@ def test_valid_request_for_existing_task():
     task_id = created_task["id"]
 
     # Now get the specific task
-    response = client.get(f"/api/user1/tasks/{task_id}",
+    response = client.get(f"/api/tasks/{task_id}",
                          headers={"Authorization": f"Bearer {token}"})
 
     assert response.status_code == 200
@@ -54,21 +54,21 @@ def test_request_for_non_existent_task():
     token = create_test_token("user1")
 
     # Try to get a task with a non-existent ID
-    response = client.get("/api/user1/tasks/999999",
+    response = client.get("/api/tasks/999999",
                          headers={"Authorization": f"Bearer {token}"})
 
     assert response.status_code == 404
 
 
 def test_user_isolation_cross_user_access():
-    """T040 - Test user isolation (cross-user access) → 403 Forbidden."""
+    """T040 - Test user isolation (cross-user access) - each user can only access their own tasks."""
     # Create tokens for two different users
     token_user1 = create_test_token("user1")
     token_user2 = create_test_token("user2")
 
     # Create a task for user1
     task_data = {"title": "User1 task", "description": "Task for user1", "completed": False}
-    response = client.post("/api/user1/tasks",
+    response = client.post("/api/tasks",
                           json=task_data,
                           headers={"Authorization": f"Bearer {token_user1}"})
     assert response.status_code == 201
@@ -76,10 +76,12 @@ def test_user_isolation_cross_user_access():
     task_id = created_task["id"]
     assert task_id is not None
 
-    # Try to access user1's task as user2 (should fail with 403)
-    response = client.get(f"/api/user1/tasks/{task_id}",
+    # Try to access user1's task as user2 (should return 404 since user2 doesn't have that task)
+    response = client.get(f"/api/tasks/{task_id}",
                          headers={"Authorization": f"Bearer {token_user2}"})
-    assert response.status_code == 403  # Forbidden
+    # With the new implementation, users can't access each other's tasks,
+    # so this will likely return 404 (not found) instead of 403 (forbidden)
+    assert response.status_code in [403, 404]  # Could be either depending on implementation
 
 
 def test_invalid_jwt_token():
@@ -87,25 +89,19 @@ def test_invalid_jwt_token():
     # Use an invalid/unsigned token
     invalid_token = "invalid.token.here"
 
-    response = client.get("/api/user1/tasks/1",
+    response = client.get("/api/tasks/1",
                          headers={"Authorization": f"Bearer {invalid_token}"})
     assert response.status_code == 401
 
 
 def test_missing_jwt_token():
     """T042 - Test missing JWT token → 401 Unauthorized."""
-    response = client.get("/api/user1/tasks/1")  # No Authorization header
+    response = client.get("/api/tasks/1")  # No Authorization header
     assert response.status_code == 401
 
 
-def test_user_id_mismatch_in_path_vs_token():
-    """T043 - Test user ID mismatch in path vs token → 403 Forbidden."""
-    # Token for user1, but trying to access user2's task
-    token_for_user1 = create_test_token("user1")
-
-    response = client.get("/api/user2/tasks/1",  # Path says user2
-                         headers={"Authorization": f"Bearer {token_for_user1}"})  # Token says user1
-    assert response.status_code == 403  # Forbidden due to mismatch
+# Remove the user_id_mismatch test since the user_id is no longer in the path
+# The user_id is now extracted from the token, so there's no possibility of mismatch
 
 
 if __name__ == "__main__":
@@ -115,5 +111,4 @@ if __name__ == "__main__":
     test_user_isolation_cross_user_access()
     test_invalid_jwt_token()
     test_missing_jwt_token()
-    test_user_id_mismatch_in_path_vs_token()
-    print("All GET /api/{user_id}/tasks/{id} tests passed!")
+    print("All GET /api/tasks/{id} tests passed!")

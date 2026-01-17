@@ -132,7 +132,7 @@ def downgrade():
 
 Provide templates for:
 ```
-DATABASE_URL=postgresql://user:password@host:port/database?sslmode=require
+NEON_DATABASE_URL=postgresql://user:password@host:port/database?sslmode=require
 DB_POOL_SIZE=20
 DB_MAX_OVERFLOW=10
 DB_POOL_TIMEOUT=30

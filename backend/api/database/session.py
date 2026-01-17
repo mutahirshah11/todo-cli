@@ -2,6 +2,7 @@ from sqlmodel import create_engine
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import QueuePool
+from sqlalchemy import text
 import os
 import asyncio
 from typing import AsyncGenerator
@@ -9,20 +10,41 @@ from urllib.parse import urlparse
 
 
 # Get database URL from environment
-DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://username:password@ep-xxx.us-east-1.aws.neon.tech/neondb?sslmode=require")
+NEON_DATABASE_URL = os.getenv("NEON_DATABASE_URL", "postgresql://username:password@ep-xxx.us-east-1.aws.neon.tech/neondb?sslmode=require")
 
-# Parse the database URL to customize connection parameters for Neon
-parsed_url = urlparse(DATABASE_URL)
+# Manually clean the URL to remove problematic parameters for asyncpg
+# The issue is that asyncpg doesn't accept parameters like sslmode, channel_binding in the same way
+# We need to handle this by parsing and reconstructing the URL properly
+from urllib.parse import urlparse, parse_qs, urlencode, urlunparse
 
-# Async engine for FastAPI with Neon-specific configuration
-# Ensure DATABASE_URL uses async driver (e.g., postgresql+asyncpg:// instead of postgresql://)
-if DATABASE_URL.startswith("postgresql://"):
-    DATABASE_URL = DATABASE_URL.replace("postgresql://", "postgresql+asyncpg://", 1)
-elif DATABASE_URL.startswith("postgres://"):
-    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql+asyncpg://", 1)
+parsed = urlparse(NEON_DATABASE_URL)
+query_params = parse_qs(parsed.query, keep_blank_values=True)
 
+# Remove all parameters that asyncpg doesn't support well
+problematic_params = ['channel_binding', 'sslmode', 'sslcert', 'sslkey', 'sslrootcert']
+
+for param in problematic_params:
+    if param in query_params:
+        del query_params[param]
+
+# Reconstruct the query string without problematic parameters
+new_query = '&'.join([f'{k}={v[0] if v else ""}' for k, v in query_params.items()])
+
+# Reconstruct the URL
+cleaned_parsed = parsed._replace(query=new_query)
+cleaned_url = urlunparse(cleaned_parsed)
+
+# Replace postgresql:// with postgresql+asyncpg:// for async driver
+if cleaned_url.startswith("postgresql://"):
+    NEON_DATABASE_URL = cleaned_url.replace("postgresql://", "postgresql+asyncpg://", 1)
+elif cleaned_url.startswith("postgres://"):
+    NEON_DATABASE_URL = cleaned_url.replace("postgres://", "postgresql+asyncpg://", 1)
+else:
+    NEON_DATABASE_URL = cleaned_url
+
+# Create async engine with proper asyncpg configuration
 async_engine = create_async_engine(
-    DATABASE_URL,
+    NEON_DATABASE_URL,
     # Neon-specific connection pooling settings for async engines
     pool_size=5,  # Smaller pool size for serverless
     max_overflow=10,  # Allow some overflow during peak loads
@@ -60,7 +82,7 @@ async def test_connection():
     try:
         async with AsyncSessionLocal() as session:
             # Execute a simple query to test connection
-            result = await session.execute("SELECT 1")
+            result = await session.execute(text("SELECT 1"))
             print("Database connection successful!")
             return True
     except Exception as e:
@@ -77,7 +99,7 @@ async def get_db_session_with_retry(max_retries: int = 3, delay: float = 1.0):
         try:
             async with AsyncSessionLocal() as session:
                 # Test the connection
-                await session.execute("SELECT 1")
+                await session.execute(text("SELECT 1"))
                 yield session
                 return
         except Exception as e:
@@ -164,7 +186,7 @@ async def get_db_session_with_error_handling():
         async with AsyncSessionLocal() as session:
             try:
                 # Test connection before yielding
-                await session.execute("SELECT 1")
+                await session.execute(text("SELECT 1"))
                 yield session
             except Exception as e:
                 DatabaseErrorHandler.handle_database_error(e, "Session creation")

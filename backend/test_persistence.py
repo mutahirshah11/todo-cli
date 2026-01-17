@@ -31,9 +31,9 @@ async def test_direct_database_persistence():
     print("Testing direct database persistence...")
 
     # Get database URL
-    database_url = os.getenv("DATABASE_URL")
+    database_url = os.getenv("NEON_DATABASE_URL")
     if not database_url:
-        print("ERROR: DATABASE_URL environment variable not set")
+        print("ERROR: NEON_DATABASE_URL environment variable not set")
         return False
 
     # Create async engine and session

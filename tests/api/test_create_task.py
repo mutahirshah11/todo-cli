@@ -1,6 +1,6 @@
 """
-Comprehensive test suite for POST /api/{user_id}/tasks endpoint.
-Tests all scenarios for creating a new task for a user.
+Comprehensive test suite for POST /api/tasks endpoint.
+Tests all scenarios for creating a new task for the authenticated user.
 """
 import pytest
 from fastapi.testclient import TestClient
@@ -26,7 +26,7 @@ def test_valid_creation_with_minimal_data():
     token = create_test_token("user1")
 
     task_data = {"title": "Minimal task"}
-    response = client.post("/api/user1/tasks",
+    response = client.post("/api/tasks",
                           json=task_data,
                           headers={"Authorization": f"Bearer {token}"})
 
@@ -49,7 +49,7 @@ def test_valid_creation_with_all_fields():
         "description": "A task with all fields filled",
         "completed": True
     }
-    response = client.post("/api/user1/tasks",
+    response = client.post("/api/tasks",
                           json=task_data,
                           headers={"Authorization": f"Bearer {token}"})
 
@@ -68,7 +68,7 @@ def test_creation_with_invalid_title_empty():
     token = create_test_token("user1")
 
     task_data = {"title": "", "description": "A task with empty title", "completed": False}
-    response = client.post("/api/user1/tasks",
+    response = client.post("/api/tasks",
                           json=task_data,
                           headers={"Authorization": f"Bearer {token}"})
 
@@ -81,7 +81,7 @@ def test_creation_with_invalid_title_over_100_chars():
 
     long_title = "A" * 101  # 101 characters, exceeding the limit
     task_data = {"title": long_title, "description": "A task with long title", "completed": False}
-    response = client.post("/api/user1/tasks",
+    response = client.post("/api/tasks",
                           json=task_data,
                           headers={"Authorization": f"Bearer {token}"})
 
@@ -94,7 +94,7 @@ def test_creation_with_invalid_description_over_500_chars():
 
     long_description = "A" * 501  # 501 characters, exceeding the limit
     task_data = {"title": "Valid title", "description": long_description, "completed": False}
-    response = client.post("/api/user1/tasks",
+    response = client.post("/api/tasks",
                           json=task_data,
                           headers={"Authorization": f"Bearer {token}"})
 
@@ -107,7 +107,7 @@ def test_invalid_jwt_token():
     invalid_token = "invalid.token.here"
 
     task_data = {"title": "Test task", "description": "Test description", "completed": False}
-    response = client.post("/api/user1/tasks",
+    response = client.post("/api/tasks",
                           json=task_data,
                           headers={"Authorization": f"Bearer {invalid_token}"})
     assert response.status_code == 401
@@ -116,7 +116,7 @@ def test_invalid_jwt_token():
 def test_missing_jwt_token():
     """T055 - Test missing JWT token → 401 Unauthorized."""
     task_data = {"title": "Test task", "description": "Test description", "completed": False}
-    response = client.post("/api/user1/tasks",
+    response = client.post("/api/tasks",
                           json=task_data)  # No Authorization header
     assert response.status_code == 401
 
@@ -130,4 +130,4 @@ if __name__ == "__main__":
     test_creation_with_invalid_description_over_500_chars()
     test_invalid_jwt_token()
     test_missing_jwt_token()
-    print("All POST /api/{user_id}/tasks tests passed!")
+    print("All POST /api/tasks tests passed!")

@@ -242,3 +242,45 @@ class UserRepository:
         except Exception as e:
             self.error_handler.handle_database_error(e, "Checking if user exists by email")
             raise
+
+    async def create_user_if_not_exists(self, user_id: str, name: str, email: str) -> User:
+        """
+        Create a new user if they don't exist, or return the existing user.
+
+        Args:
+            user_id: The ID of the user to create
+            name: Name of the new user
+            email: Email of the new user
+
+        Returns:
+            Created or existing User object
+        """
+        try:
+            # First, check if the user already exists
+            existing_user = await self.get_user_by_id(user_id)
+            if existing_user:
+                return existing_user
+
+            # Create a new user with the specific user_id
+            db_user = User(
+                user_id=user_id,
+                name=name,
+                email=email,
+                is_active=True
+            )
+
+            self.session.add(db_user)
+            await self.session.commit()
+            await self.session.refresh(db_user)
+            return db_user
+        except IntegrityError as e:
+            # If there's an integrity error, it might mean the user was created by another request
+            # Check again if the user exists
+            existing_user = await self.get_user_by_id(user_id)
+            if existing_user:
+                return existing_user
+            self.error_handler.handle_database_error(e, "Creating user - integrity constraint violation")
+            raise
+        except Exception as e:
+            self.error_handler.handle_database_error(e, "Creating user if not exists")
+            raise

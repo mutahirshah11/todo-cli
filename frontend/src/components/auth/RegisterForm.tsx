@@ -3,6 +3,7 @@ import { useRouter } from 'next/navigation';
 import { useAuthContext } from '@/app/providers/auth-provider';
 
 const RegisterForm = () => {
+  const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -20,13 +21,24 @@ const RegisterForm = () => {
       return;
     }
 
+    // Password validation matching backend requirements
     if (password.length < 8) {
       setError('Password must be at least 8 characters');
       return;
     }
 
+    const hasUpper = /[A-Z]/.test(password);
+    const hasLower = /[a-z]/.test(password);
+    const hasDigit = /\d/.test(password);
+    const hasSpecial = /[^A-Za-z0-9]/.test(password);
+
+    if (!(hasUpper && hasLower && hasDigit && hasSpecial)) {
+      setError('Password must contain uppercase, lowercase, numbers, and special characters');
+      return;
+    }
+
     try {
-      await register(email, password);
+      await register(name, email, password);
       router.push('/dashboard'); // Redirect to dashboard after registration
     } catch (err: any) {
       setError(err.message || 'Registration failed');
@@ -39,6 +51,21 @@ const RegisterForm = () => {
       {error && <div className="mb-4 p-3 bg-red-100 text-red-700 rounded">{error}</div>}
 
       <form onSubmit={handleSubmit}>
+        <div className="mb-4">
+          <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
+            Full Name
+          </label>
+          <input
+            id="name"
+            type="text"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            placeholder="Enter your full name"
+            required
+          />
+        </div>
+
         <div className="mb-4">
           <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
             Email
@@ -63,8 +90,12 @@ const RegisterForm = () => {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            placeholder="At least 8 chars with upper, lower, number, special"
             required
           />
+          <p className="text-xs text-gray-500 mt-1">
+            Must contain uppercase, lowercase, number &amp; special character
+          </p>
         </div>
 
         <div className="mb-6">
