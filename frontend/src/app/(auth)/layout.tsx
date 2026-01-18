@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { AuthProvider } from '@/app/providers/auth-provider';
+import { SplitAuthLayout } from '@/components/layout/SplitAuthLayout';
 
 export default function AuthLayout({
   children,
@@ -10,9 +11,9 @@ export default function AuthLayout({
 }) {
   return (
     <AuthProvider>
-      <div className="min-h-screen">
+      <SplitAuthLayout>
         {children}
-      </div>
+      </SplitAuthLayout>
     </AuthProvider>
   );
 }

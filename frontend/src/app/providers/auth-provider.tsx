@@ -2,6 +2,8 @@
 
 import React, { ReactNode, createContext, useContext, useState, useEffect, useRef } from 'react';
 import { useStore } from '@/lib/store';
+import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
 
 interface AuthContextType {
   user: any;
@@ -15,7 +17,8 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const { token: storeToken, user, login: storeLogin, logout: storeLogout, fetchUserInfo: storeFetchUserInfo, setTokenFromStorage } = useStore();
+  const { token: storeToken, user, login: storeLogin, logout: storeLogout, setTokenFromStorage } = useStore();
+  const router = useRouter();
 
   // Initialize auth state from localStorage if store doesn't have a token
   useEffect(() => {
@@ -172,23 +175,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         try {
           errorData = await response.json();
         } catch (e) {
-          // If response is not JSON, create a generic error
           throw new Error(`Login failed with status ${response.status}`);
         }
-
-        console.log('Login error response:', errorData); // Debug logging
 
         // Handle different error response formats
         if (typeof errorData === 'string') {
           throw new Error(errorData);
         } else if (Array.isArray(errorData) && errorData.length > 0) {
-          // Pydantic validation error format: [{loc: [], msg: "", type: ""}]
           const firstError = errorData[0];
           if (firstError && typeof firstError.msg === 'string') {
             throw new Error(firstError.msg);
           }
         } else if (typeof errorData === 'object') {
-          // Check for various possible error message fields
           if (errorData.detail && typeof errorData.detail === 'string') {
             throw new Error(errorData.detail);
           } else if (Array.isArray(errorData.detail) && errorData.detail.length > 0) {
@@ -201,22 +199,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           } else if (errorData.message && typeof errorData.message === 'string') {
             throw new Error(errorData.message);
           } else {
-            // If none of the common fields exist, try to create a meaningful error
             const errorStr = JSON.stringify(errorData);
             throw new Error(`Login failed: ${errorStr}`);
           }
         }
-
         throw new Error('Login failed with validation error');
       }
 
       const data = await response.json();
       if (data.access_token) {
-        // Use store's login function to update state
         storeLogin(data.access_token, data.user);
-        // The store's login function already handles localStorage, so we don't need to set it again here
+        toast.success(`Welcome back, ${data.user.name.split(' ')[0]}!`, {
+          description: 'You have successfully signed in.',
+          duration: 3000,
+        });
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Login error:', error);
       throw error;
     }
@@ -239,23 +237,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         try {
           errorData = await response.json();
         } catch (e) {
-          // If response is not JSON, create a generic error
           throw new Error(`Registration failed with status ${response.status}`);
         }
 
-        console.log('Registration error response:', errorData); // Debug logging
-
-        // Handle different error response formats
         if (typeof errorData === 'string') {
           throw new Error(errorData);
         } else if (Array.isArray(errorData) && errorData.length > 0) {
-          // Pydantic validation error format: [{loc: [], msg: "", type: ""}]
           const firstError = errorData[0];
           if (firstError && typeof firstError.msg === 'string') {
             throw new Error(firstError.msg);
           }
         } else if (typeof errorData === 'object') {
-          // Check for various possible error message fields
           if (errorData.detail && typeof errorData.detail === 'string') {
             throw new Error(errorData.detail);
           } else if (Array.isArray(errorData.detail) && errorData.detail.length > 0) {
@@ -268,20 +260,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           } else if (errorData.message && typeof errorData.message === 'string') {
             throw new Error(errorData.message);
           } else {
-            // If none of the common fields exist, try to create a meaningful error
             const errorStr = JSON.stringify(errorData);
             throw new Error(`Registration failed: ${errorStr}`);
           }
         }
-
         throw new Error('Registration failed with validation error');
       }
 
       const data = await response.json();
       if (data.access_token) {
-        // Use store's login function to update state
         storeLogin(data.access_token, data.user);
-        // The store's login function already handles localStorage, so we don't need to set it again here
+        toast.success('Account created!', {
+          description: 'Welcome to Tickwen.',
+          duration: 3000,
+        });
       }
     } catch (error) {
       console.error('Registration error:', error);
@@ -293,6 +285,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       // Call the store's logout function with full cleanup
       storeLogout(true);
+      
+      // Force redirection to home page
+      router.push('/');
+      
+      toast.success('Signed out successfully', {
+        duration: 2000,
+      });
     } catch (error) {
       console.error('Logout error:', error);
       // Fallback cleanup if store logout fails
@@ -301,6 +300,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       document.cookie.split(";").forEach(function(c) {
         document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
       });
+      router.push('/');
     }
   };
 

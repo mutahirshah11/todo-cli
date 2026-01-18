@@ -2,7 +2,6 @@
 
 import { ThemeProvider } from '@/app/providers';
 import { AuthProvider } from '@/app/providers/auth-provider';
-import { Navbar } from '@/components/feature/Navbar';
 import { Toaster } from 'sonner';
 
 interface ThemeProviderWrapperProps {
@@ -13,14 +12,14 @@ export default function ThemeProviderWrapper({ children }: ThemeProviderWrapperP
   return (
     <ThemeProvider
       attribute="class"
-      defaultTheme="system"
-      enableSystem
+      defaultTheme="dark"
+      forcedTheme="dark"
+      enableSystem={false}
       disableTransitionOnChange
     >
       <AuthProvider>
-        <Navbar />
-        <main>{children}</main>
-        <Toaster />
+        <main className="min-h-screen bg-background">{children}</main>
+        <Toaster theme="dark" position="top-center" richColors />
       </AuthProvider>
     </ThemeProvider>
   );

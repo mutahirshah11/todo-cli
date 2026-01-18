@@ -144,13 +144,22 @@ class AuthService:
         
         user = self.user_service.get_user_by_email(email)
 
+        # Retry logic: If user not found, wait briefly and try again (handles potential DB cold start/glitches)
+        if not user:
+            import time
+            print(f"User not found initially for {email}, retrying in 0.5s...")
+            time.sleep(0.5)
+            user = self.user_service.get_user_by_email(email)
+
         if not user:
             print(f"Authentication failed: User not found for email {email}")
-            raise InvalidCredentialsException("Invalid email or password")
+            # return specific error for debugging (switch back to generic later)
+            raise InvalidCredentialsException("Invalid email (User not found)")
             
         if not verify_password(password, user.password_hash):
             print(f"Authentication failed: Invalid password for user {email}")
-            raise InvalidCredentialsException("Invalid email or password")
+             # return specific error for debugging
+            raise InvalidCredentialsException("Invalid password")
 
         if not user.is_active:
             raise InvalidCredentialsException("User account is deactivated")
