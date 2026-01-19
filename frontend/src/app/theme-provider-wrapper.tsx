@@ -3,6 +3,7 @@
 import { ThemeProvider } from '@/app/providers';
 import { AuthProvider } from '@/app/providers/auth-provider';
 import { Toaster } from 'sonner';
+import { GlobalChatbot } from '@/components/chat/global-chatbot';
 
 interface ThemeProviderWrapperProps {
   children: React.ReactNode;
@@ -19,6 +20,7 @@ export default function ThemeProviderWrapper({ children }: ThemeProviderWrapperP
     >
       <AuthProvider>
         <main className="min-h-screen bg-background">{children}</main>
+        <GlobalChatbot />
         <Toaster theme="dark" position="top-center" richColors />
       </AuthProvider>
     </ThemeProvider>
