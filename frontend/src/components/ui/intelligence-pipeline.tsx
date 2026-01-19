@@ -135,7 +135,7 @@ export const IntelligencePipeline = () => {
                        </div>
                        <motion.div 
                         initial={{ width: 0 }} animate={{ width: "100%" }}
-                        className="bg-primary/5 border border-primary/20 rounded-xl px-3 py-2 text-sm text-primary-foreground font-medium flex items-center justify-between overflow-hidden whitespace-nowrap"
+                        className="text-green-100 bg-primary/5 border border-primary/20 rounded-xl px-3 py-2 text-sm text-primary-foreground font-medium flex items-center justify-between overflow-hidden whitespace-nowrap"
                        >
                           Create Reminder
                           <CheckCircle2 className="w-3 h-3 text-primary opacity-50" />

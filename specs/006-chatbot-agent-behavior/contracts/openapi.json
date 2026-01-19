@@ -1,0 +1,51 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Todo MCP Tools",
+    "version": "1.0.0"
+  },
+  "components": {
+    "schemas": {
+      "AddTask": {
+        "type": "object",
+        "properties": {
+          "title": { "type": "string", "description": "Title of the task" },
+          "description": { "type": "string", "description": "Optional description" },
+          "due_date": { "type": "string", "format": "date-time", "description": "ISO-8601 due date" }
+        },
+        "required": ["title"]
+      },
+      "ListTasks": {
+        "type": "object",
+        "properties": {
+          "status": { "type": "string", "enum": ["pending", "completed", "all"], "default": "all" }
+        }
+      },
+      "UpdateTask": {
+        "type": "object",
+        "properties": {
+          "task_id": { "type": "integer" },
+          "title": { "type": "string" },
+          "description": { "type": "string" },
+          "status": { "type": "string", "enum": ["pending", "completed"] },
+          "due_date": { "type": "string", "format": "date-time" }
+        },
+        "required": ["task_id"]
+      },
+      "CompleteTask": {
+        "type": "object",
+        "properties": {
+          "task_id": { "type": "integer" }
+        },
+        "required": ["task_id"]
+      },
+      "DeleteTask": {
+        "type": "object",
+        "properties": {
+          "task_id": { "type": "integer" }
+        },
+        "required": ["task_id"]
+      }
+    }
+  }
+}
