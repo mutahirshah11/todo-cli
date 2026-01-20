@@ -1,0 +1,20 @@
+# Docker
+node_modules/
+.git/
+Dockerfile*
+.dockerignore
+*.log*
+.env*
+coverage/
+__pycache__/
+*.pyc
+.venv/
+venv/
+dist/
+*.egg-info/
+.next/
+out/
+.pytest_cache/
+.mypy_cache/
+.idea/
+.vscode/
