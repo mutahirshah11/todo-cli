@@ -15,8 +15,17 @@ interface TaskItemProps {
 }
 
 export const TaskItem: React.FC<TaskItemProps> = ({ task, onToggle, onDelete }) => {
+  const [isHovered, setIsHovered] = useState(false);
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
+
+  const background = useMotionTemplate`
+    radial-gradient(
+      650px circle at ${mouseX}px ${mouseY}px,
+      rgba(52, 211, 153, 0.15),
+      transparent 80%
+    )
+  `;
 
   function handleMouseMove({ currentTarget, clientX, clientY }: React.MouseEvent) {
     const { left, top } = currentTarget.getBoundingClientRect();
@@ -26,30 +35,26 @@ export const TaskItem: React.FC<TaskItemProps> = ({ task, onToggle, onDelete }) 
 
   return (
     <motion.div
-      layout
       initial={{ opacity: 0, y: 20, scale: 0.95 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       exit={{ opacity: 0, scale: 0.9, filter: "blur(10px)" }}
-      whileHover={{ scale: 1.02, zIndex: 10 }}
+      whileHover={{ scale: 1.02 }}
       transition={{ type: "spring", stiffness: 500, damping: 30 }}
-      className="group relative rounded-xl border border-white/10 bg-[#0f172a] px-4 py-4 shadow-sm transition-colors hover:border-primary/30"
+      className="group relative w-full rounded-xl border border-white/10 bg-[#0f172a] px-4 py-4 shadow-sm transition-colors hover:border-primary/30"
       onMouseMove={handleMouseMove}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
     >
       {/* Flashlight Effect */}
       <motion.div
-        className="pointer-events-none absolute -inset-px rounded-xl opacity-0 transition duration-300 group-hover:opacity-100"
-        style={{
-          background: useMotionTemplate`
-            radial-gradient(
-              650px circle at ${mouseX}px ${mouseY}px,
-              rgba(52, 211, 153, 0.15),
-              transparent 80%
-            )
-          `,
-        }}
+        className={cn(
+          "pointer-events-none absolute -inset-px rounded-xl transition duration-300",
+          isHovered ? "opacity-100" : "opacity-0"
+        )}
+        style={{ background }}
       />
 
-      <div className="relative flex items-start gap-4 z-10">
+      <div className="relative flex items-center gap-4">
         <button
           onClick={() => onToggle(task.id)}
           className={cn(
@@ -79,7 +84,10 @@ export const TaskItem: React.FC<TaskItemProps> = ({ task, onToggle, onDelete }) 
             </p>
           )}
 
-          <div className="mt-3 flex items-center gap-3 opacity-60 group-hover:opacity-100 transition-opacity">
+          <div className={cn(
+            "mt-3 flex items-center gap-3 transition-opacity",
+            isHovered ? "opacity-100" : "opacity-60"
+          )}>
             <span className="flex items-center text-xs text-gray-500 bg-white/5 px-2 py-0.5 rounded-md border border-white/5">
                <Calendar className="mr-1 h-3 w-3" />
                {new Date(task.created_at).toLocaleDateString()}
@@ -95,8 +103,11 @@ export const TaskItem: React.FC<TaskItemProps> = ({ task, onToggle, onDelete }) 
         <Button
           variant="ghost"
           size="icon"
-          onClick={() => onDelete(task.id)}
-          className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity text-red-400 hover:text-red-300 hover:bg-red-400/10"
+          onClick={(e) => {
+            e.stopPropagation();
+            onDelete(task.id);
+          }}
+          className="h-8 w-8 text-red-400 hover:text-red-300 hover:bg-red-400/10 opacity-100 relative cursor-pointer"
         >
           <Trash2 className="h-4 w-4" />
         </Button>

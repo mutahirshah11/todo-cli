@@ -5,7 +5,7 @@ import dotenv
 dotenv.load_dotenv()
 
 from fastapi import FastAPI
-from api.routers import tasks
+from api.routers import tasks, agent
 from api.config.settings import settings
 from api.config.security import add_security_middleware
 from api.middleware.request_size import RequestSizeLimitMiddleware
@@ -27,6 +27,7 @@ add_security_middleware(app)
 
 # Include API routers
 app.include_router(tasks.router, prefix="/api/v1", tags=["tasks"])
+app.include_router(agent.router, prefix="/api/v1/agent", tags=["agent"])
 
 # Add error handlers
 add_error_handlers(app)

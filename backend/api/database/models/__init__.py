@@ -2,5 +2,6 @@ from .task import Task, TaskStatus
 from .conversation import Conversation
 from .message import Message, MessageRole
 from .user import User
+from .auth_user import AuthUser
 
-__all__ = ["Task", "TaskStatus", "Conversation", "Message", "MessageRole", "User"]
+__all__ = ["Task", "TaskStatus", "Conversation", "Message", "MessageRole", "User", "AuthUser"]

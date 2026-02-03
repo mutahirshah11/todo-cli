@@ -57,6 +57,41 @@ python -m src.todo_cli.main --help
 python -m src.todo_cli.main add --help
 ```
 
+## MCP Server (For AI Agents)
+
+The project includes an MCP (Model Context Protocol) server to allow AI agents to manage tasks.
+
+### Prerequisites
+- Python 3.12+
+- `mcp` package installed
+- Local PostgreSQL (Neon) or connection string
+
+### Running the MCP Server
+```bash
+# Set environment variables
+export NEON_DATABASE_URL="postgresql://..."
+
+# Run the server (Stdio mode)
+python backend/mcp_server.py
+```
+
+### Integrating with Claude Desktop / Agents
+Add the following to your `claude_desktop_config.json`:
+
+```json
+{
+  "mcpServers": {
+    "todo-backend": {
+      "command": "python",
+      "args": ["/absolute/path/to/project/backend/mcp_server.py"],
+      "env": {
+        "NEON_DATABASE_URL": "postgresql://..."
+      }
+    }
+  }
+}
+```
+
 ## Error Codes
 
 - `0`: Success
@@ -80,6 +115,10 @@ src/
 │   └── cli/
 │       ├── __init__.py
 │       └── commands.py    # CLI command definitions
+backend/
+├── mcp_server.py           # MCP Server entry point
+├── api/
+│   ├── mcp/                # MCP specific logic
 tests/
 ├── unit/
 │   ├── test_task.py
@@ -102,6 +141,9 @@ python -m pytest
 python -m pytest tests/unit/
 python -m pytest tests/integration/
 python -m pytest tests/contract/
+
+# Run MCP tests
+$env:PYTHONPATH=".;backend"; pytest backend/tests/mcp
 ```
 
 ### Storage
@@ -113,3 +155,4 @@ The application uses temporary file persistence to maintain state between comman
 - **Task Model**: Represents a single todo item with ID, content, and completion status
 - **TaskService**: Handles all business logic for task operations with persistence
 - **CLI Commands**: Provides the command-line interface using the Click library
+- **MCP Server**: Exposes task operations as tools for AI agents using the Official MCP SDK

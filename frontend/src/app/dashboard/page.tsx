@@ -37,10 +37,10 @@ export default function DashboardPage() {
   const [isFocusMode, setIsFocusMode] = useState(false);
 
   useEffect(() => {
-    if (isAuthenticated()) {
+    if (isAuthenticated() && user) {
       fetchTasks();
     }
-  }, []);
+  }, [user]);
 
   const handleDeleteClick = (taskId: string, taskTitle: string) => {
     setSelectedTaskId(taskId);

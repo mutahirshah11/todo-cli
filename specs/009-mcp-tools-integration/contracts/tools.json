@@ -1,0 +1,68 @@
+{
+  "tools": [
+    {
+      "name": "add_task",
+      "description": "Create a new task for a user",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "user_id": { "type": "string" },
+          "title": { "type": "string" },
+          "description": { "type": "string" }
+        },
+        "required": ["user_id", "title"]
+      }
+    },
+    {
+      "name": "list_tasks",
+      "description": "List tasks for a user with optional filtering",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "user_id": { "type": "string" },
+          "status": { "type": "string", "enum": ["pending", "completed"] },
+          "include_deleted": { "type": "boolean" }
+        },
+        "required": ["user_id"]
+      }
+    },
+    {
+      "name": "update_task",
+      "description": "Update an existing task",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "user_id": { "type": "string" },
+          "task_id": { "type": "string" },
+          "title": { "type": "string" },
+          "description": { "type": "string" }
+        },
+        "required": ["user_id", "task_id"]
+      }
+    },
+    {
+      "name": "complete_task",
+      "description": "Mark a task as completed",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "user_id": { "type": "string" },
+          "task_id": { "type": "string" }
+        },
+        "required": ["user_id", "task_id"]
+      }
+    },
+    {
+      "name": "delete_task",
+      "description": "Delete (soft-delete) a task",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "user_id": { "type": "string" },
+          "task_id": { "type": "string" }
+        },
+        "required": ["user_id", "task_id"]
+      }
+    }
+  ]
+}

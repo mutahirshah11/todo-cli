@@ -24,6 +24,11 @@ class TaskAdapter:
         db_tasks = await self.task_repo.get_tasks_by_user(self.user_id)
         return [self._convert_db_task_to_api_response(db_task) for db_task in db_tasks]
 
+    async def get_tasks_by_status(self, completed: bool) -> List[TaskResponse]:
+        """Get tasks filtered by completion status and convert to API response format."""
+        db_tasks = await self.task_repo.get_tasks_by_completion_status(self.user_id, completed)
+        return [self._convert_db_task_to_api_response(db_task) for db_task in db_tasks]
+
     async def get_task_by_id(self, task_id: str) -> Optional[TaskResponse]:
         """Get a specific task by ID and convert to API response format."""
         # Verify ownership first

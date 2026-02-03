@@ -9,11 +9,11 @@ export function FloatingChatbot() {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end">
+    <>
       {/* Chat Window */}
       <div
         className={cn(
-          "mb-4 w-[400px] h-[600px] max-h-[80vh] max-w-[calc(100vw-2rem)] transition-all duration-300 ease-in-out transform origin-bottom-right shadow-2xl rounded-2xl border bg-background overflow-hidden",
+          "fixed bottom-24 right-6 z-50 mb-0 w-[400px] h-[600px] max-h-[80vh] max-w-[calc(100vw-2rem)] transition-all duration-300 ease-in-out transform origin-bottom-right shadow-2xl rounded-2xl border bg-background overflow-hidden flex flex-col",
           isOpen 
             ? "opacity-100 scale-100 translate-y-0" 
             : "opacity-0 scale-95 translate-y-4 pointer-events-none"
@@ -41,7 +41,7 @@ export function FloatingChatbot() {
       <button
         onClick={() => setIsOpen(!isOpen)}
         className={cn(
-          "w-14 h-14 rounded-full shadow-lg flex items-center justify-center transition-all duration-300 active:scale-95",
+          "fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full shadow-lg flex items-center justify-center transition-all duration-300 active:scale-95",
           isOpen 
             ? "bg-muted text-foreground rotate-90" 
             : "bg-primary text-primary-foreground hover:scale-110"
@@ -53,6 +53,6 @@ export function FloatingChatbot() {
           <MessageSquare className="w-6 h-6" />
         )}
       </button>
-    </div>
+    </>
   );
 }

@@ -1,6 +1,7 @@
 from pydantic import BaseModel, Field, field_validator
 from typing import Optional
 from datetime import datetime
+from uuid import UUID
 
 
 class TaskBase(BaseModel):
@@ -54,7 +55,7 @@ class TaskToggle(BaseModel):
 
 class TaskResponse(TaskBase):
     """Response model for a task with all fields."""
-    id: str
+    id: UUID
     completed: bool
     created_at: datetime
     updated_at: datetime
