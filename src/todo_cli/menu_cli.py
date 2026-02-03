@@ -7,8 +7,9 @@ from .services.task_service import TaskService
 class MenuDrivenTodoCLI:
     """Menu-driven Todo CLI application."""
 
-    def __init__(self):
-        self.service = TaskService()
+    def __init__(self, user_id: str = "cli-user"):
+        self.user_id = user_id
+        self.service = TaskService(user_id=self.user_id)
 
     def display_menu(self):
         """Display the main menu."""
@@ -38,14 +39,15 @@ class MenuDrivenTodoCLI:
     def add_task(self):
         """Add a new task."""
         print("\n--- Add New Task ---")
-        content = input("Enter task content: ").strip()
+        title = input("Enter task title: ").strip()
+        description = input("Enter task description (optional): ").strip()
 
-        if not content:
-            print("Error: Task content cannot be empty!")
+        if not title:
+            print("Error: Task title cannot be empty!")
             return
 
         try:
-            task = self.service.add_task(content)
+            task = self.service.add_task(title, description)
             print(f"✓ Task added successfully with ID {task.id}")
         except Exception as e:
             print(f"✗ Error: {str(e)}")
@@ -59,12 +61,12 @@ class MenuDrivenTodoCLI:
             print("No tasks in the list.")
             return
 
-        print(f"{'ID':<4} {'Status':<8} {'Content'}")
+        print(f"{'ID':<4} {'Status':<8} {'Title'}")
         print("-" * 50)
 
         for task in tasks:
             status = "✓ Done" if task.completed else "○ Pending"
-            print(f"{task.id:<4} {status:<8} {task.content}")
+            print(f"{task.id:<4} {status:<8} {task.title}")
 
     def clear_all_tasks(self):
         """Clear all tasks from the list."""
@@ -112,14 +114,16 @@ class MenuDrivenTodoCLI:
                 print(f"✗ Error: Task with ID {task_id} not found!")
                 return
 
-            print(f"Current task: {current_task.content}")
-            new_content = input("Enter new content: ").strip()
+            print(f"Current title: {current_task.title}")
+            print(f"Current description: {current_task.description}")
+            
+            new_title = input("Enter new title (leave blank to keep current): ").strip()
+            new_description = input("Enter new description (leave blank to keep current): ").strip()
 
-            if not new_content:
-                print("✗ Error: New content cannot be empty!")
-                return
+            final_title = new_title if new_title else current_task.title
+            final_description = new_description if new_description else current_task.description
 
-            updated_task = self.service.update_task(task_id, new_content)
+            updated_task = self.service.update_task(task_id, final_title, final_description)
             if updated_task:
                 print(f"✓ Task {task_id} updated successfully!")
             else:
@@ -155,7 +159,8 @@ class MenuDrivenTodoCLI:
             if task:
                 print(f"\nTask Details:")
                 print(f"ID: {task.id}")
-                print(f"Content: {task.content}")
+                print(f"Title: {task.title}")
+                print(f"Description: {task.description}")
                 print(f"Status: {'Completed' if task.completed else 'Pending'}")
             else:
                 print(f"✗ Error: Task with ID {task_id} not found!")
