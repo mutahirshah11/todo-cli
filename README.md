@@ -1,3 +1,12 @@
+---
+title: Tickwen Backend
+emoji: ✅
+colorFrom: yellow
+colorTo: blue
+sdk: docker
+pinned: false
+---
+
 # Todo CLI Application
 
 A command-line todo application with in-memory storage and temporary file persistence between command executions.
