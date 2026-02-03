@@ -10,62 +10,32 @@ import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 
 export default function EditTaskPage() {
-  const { id } = useParams<{ id: string }>();
+  const params = useParams();
   const router = useRouter();
-  const { tasks, updateTask, fetchTasks, isLoading, isAuthenticated } = useStore();
+  const taskId = params.id as string;
+  
+  const { tasks, updateTask, isAuthenticated, isLoading } = useStore();
+  const task = tasks.find(t => t.id === taskId);
 
   useEffect(() => {
-    if (isAuthenticated()) {
-      fetchTasks();
+    if (!isAuthenticated()) {
+      router.push('/login');
     }
-  }, []);
+  }, [isAuthenticated, router]);
 
-  const task = tasks.find(t => t.id === id);
-
-  const handleSubmit = async (data: { title: string; description?: string }) => {
-    if (isAuthenticated() && id) {
-      await updateTask(id, data);
-      router.push('/dashboard');
-      router.refresh(); // Refresh to update the UI
-    }
+  const handleSubmit = async (data: { title?: string; description?: string }) => {
+    await updateTask(taskId, data);
+    router.push('/dashboard');
+    router.refresh();
   };
-
-  if (!isAuthenticated()) {
-    return (
-      <div className="container mx-auto py-10">
-        <div className="max-w-md mx-auto text-center">
-          <h1 className="text-2xl font-bold mb-4">Access Denied</h1>
-          <p className="text-muted-foreground mb-6">
-            Please log in to edit a task.
-          </p>
-          <Link href="/login">
-            <Button>Go to Login</Button>
-          </Link>
-        </div>
-      </div>
-    );
-  }
-
-  if (isLoading && !task) {
-    return (
-      <div className="container mx-auto py-10 flex justify-center">
-        <Spinner size="lg" />
-      </div>
-    );
-  }
 
   if (!task) {
     return (
-      <div className="container mx-auto py-10">
-        <div className="max-w-md mx-auto text-center">
-          <h1 className="text-2xl font-bold mb-4">Task Not Found</h1>
-          <p className="text-muted-foreground mb-6">
-            The task you{'\''}re looking for doesn{'\''}t exist or you don{'\''}t have permission to view it.
-          </p>
-          <Link href="/dashboard">
-            <Button>Back to Dashboard</Button>
-          </Link>
-        </div>
+      <div className="container mx-auto py-10 text-center">
+        <h1 className="text-2xl font-bold mb-4">Task Not Found</h1>
+        <Link href="/dashboard">
+          <Button variant="outline">Back to Dashboard</Button>
+        </Link>
       </div>
     );
   }
@@ -87,8 +57,9 @@ export default function EditTaskPage() {
           defaultValues={{
             title: task.title,
             description: task.description || '',
+            is_completed: task.is_completed
           }}
-          submitButtonText="Update Task"
+          submitButtonText={isLoading ? "Updating..." : "Update Task"}
         />
       </div>
     </div>
