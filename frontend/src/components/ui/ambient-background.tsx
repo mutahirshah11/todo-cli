@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { useStore } from '@/lib/store';
+import { useStore } from '../../lib/store';
 
 export const AmbientBackground = () => {
   const { tasks } = useStore();

@@ -2,7 +2,7 @@
 
 import React, { useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { useStore } from '@/lib/store';
+import { useStore } from '../../../lib/store';
 import { TaskForm } from '@/components/feature/TaskForm';
 import { Button } from '@/components/ui/button';
 import { Spinner } from '@/components/ui/spinner';

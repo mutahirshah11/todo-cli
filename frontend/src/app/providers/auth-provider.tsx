@@ -1,7 +1,7 @@
 'use client';
 
 import React, { ReactNode, createContext, useContext, useState, useEffect, useRef } from 'react';
-import { useStore } from '@/lib/store';
+import { useStore } from '../../lib/store';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 

@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Trash2, Square, CheckSquare, Calendar, Tag } from 'lucide-react';
 import { Task } from '@/lib/types';
-import { cn } from '@/lib/utils';
+import { cn } from '../../lib/utils';
 import { motion, useMotionTemplate, useMotionValue } from 'framer-motion';
 
 interface TaskItemProps {

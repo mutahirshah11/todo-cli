@@ -3,8 +3,8 @@ import { Bot, Send, Sparkles, User, StopCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Card } from '@/components/ui/card';
-import { cn } from '@/lib/utils';
-import { useStore } from '@/lib/store';
+import { cn } from '../../lib/utils';
+import { useStore } from '../../lib/store';
 
 interface Message {
   id: string;
