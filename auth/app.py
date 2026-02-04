@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+import os
 from api.routers import auth
 
 # Create FastAPI app instance
@@ -10,9 +11,17 @@ app = FastAPI(
 )
 
 # Add standard CORS middleware
+allowed_origins = os.getenv("ALLOWED_ORIGINS", "*").split(",")
+# Add common dev origins if not present
+if "*" not in allowed_origins:
+    dev_origins = ["http://localhost:3000", "http://127.0.0.1:3000", "http://localhost:3001"]
+    for origin in dev_origins:
+        if origin not in allowed_origins:
+            allowed_origins.append(origin)
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://127.0.0.1:3000", "http://localhost:3001", "*"],  # Allow frontend origin
+    allow_origins=allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],  # Allow all methods (GET, POST, PUT, DELETE, OPTIONS, etc.)
     allow_headers=["*"],  # Allow all headers including Authorization
