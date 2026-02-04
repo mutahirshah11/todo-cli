@@ -24,6 +24,10 @@ class DatabaseUserService:
         database_url = os.getenv("NEON_DATABASE_URL")
         if not database_url:
             raise ValueError("NEON_DATABASE_URL environment variable not set")
+            
+        # Fix for SQLAlchemy 1.4+ which requires 'postgresql://' instead of 'postgres://'
+        if database_url.startswith("postgres://"):
+            database_url = database_url.replace("postgres://", "postgresql://", 1)
 
         # Create sync engine for auth service
         self.engine = create_engine(database_url, pool_pre_ping=True)
