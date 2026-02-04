@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { useStore } from '../../lib/store';
+import { useStore } from '@/lib/store';
 import { TaskList } from '@/components/feature/TaskList';
 import { DeleteConfirmationModal } from '@/components/feature/DeleteConfirmationModal';
 import { Button } from '@/components/ui/button';
@@ -12,7 +12,7 @@ import { useAuthContext } from '@/app/providers/auth-provider';
 import { Loader } from '@/components/ui/loader';
 import { motion, AnimatePresence } from 'framer-motion';
 import { AmbientBackground } from '@/components/ui/ambient-background';
-import { cn } from '../../lib/utils';
+import { cn } from '@/lib/utils';
 import { TaskItem } from '@/components/feature/TaskItem';
 import { TickwenLogo } from '@/components/ui/tickwen-logo';
 
