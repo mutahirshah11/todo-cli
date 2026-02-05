@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { useStore } from '@/lib/store';
 import { TaskList } from '@/components/feature/TaskList';
 import { DeleteConfirmationModal } from '@/components/feature/DeleteConfirmationModal';
@@ -35,12 +36,15 @@ export default function DashboardPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isFocusMode, setIsFocusMode] = useState(false);
+  const router = useRouter(); // Initialize router
 
   useEffect(() => {
-    if (isAuthenticated() && user) {
+    if (!isAuthenticated()) {
+      router.push('/'); // Force redirect if not authenticated
+    } else if (user) {
       fetchTasks();
     }
-  }, [user]);
+  }, [isAuthenticated, user, router]);
 
   const handleDeleteClick = (taskId: string, taskTitle: string) => {
     setSelectedTaskId(taskId);
