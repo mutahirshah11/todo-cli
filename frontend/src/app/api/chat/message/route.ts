@@ -16,8 +16,15 @@ export async function POST(req: Request) {
     }
 
     // Call the actual FastAPI backend
-    // Assuming backend runs on http://localhost:8000
-    const backendRes = await fetch("http://localhost:8000/api/v1/agent/chat", {
+    const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+    // Remove trailing slash if present
+    const cleanBaseUrl = baseUrl.endsWith('/') ? baseUrl.slice(0, -1) : baseUrl;
+    // Construct URL: Check if base url already has /api/v1
+    const endpoint = cleanBaseUrl.includes('/api/v1') 
+      ? `${cleanBaseUrl}/agent/chat` 
+      : `${cleanBaseUrl}/api/v1/agent/chat`;
+
+    const backendRes = await fetch(endpoint, {
       method: "POST",
       headers,
       body: JSON.stringify({ message, history, user_id }),

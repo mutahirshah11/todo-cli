@@ -21,10 +21,14 @@ class ApiClient {
     // The user_id is now extracted from the JWT token, not from the URL path
     // Check if NEXT_PUBLIC_API_URL already includes the /api/v1 part
     const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
-    // For the backend service, it's typically running on port 8000
-    // The backend API endpoints are already in the format /api/v1/tasks
-    const baseApiUrl = baseUrl;
-    const url = `${baseApiUrl}/api/v1/${endpoint}`;
+    
+    // Remove trailing slash if present
+    const cleanBaseUrl = baseUrl.endsWith('/') ? baseUrl.slice(0, -1) : baseUrl;
+    
+    // Construct URL: Check if base url already has /api/v1
+    const url = cleanBaseUrl.includes('/api/v1')
+      ? `${cleanBaseUrl}/${endpoint}`
+      : `${cleanBaseUrl}/api/v1/${endpoint}`;
 
     try {
       const response = await fetch(url, {
