@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-auth
+  labels:
+    app: {{ .Release.Name }}-auth
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}-auth
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}-auth
+    spec:
+      containers:
+        - name: auth
+          image: "{{ .Values.auth.image }}:{{ .Values.auth.tag }}"
+          imagePullPolicy: {{ .Values.imagePullPolicy }}
+          ports:
+            - containerPort: {{ .Values.auth.port }}
+          env:
+            - name: DATABASE_URL
+              value: "postgresql://{{ .Values.db.user }}:{{ .Values.db.password }}@{{ .Release.Name }}-db:{{ .Values.db.port }}/{{ .Values.db.name }}"
+            - name: NEON_DATABASE_URL
+              value: "postgresql://{{ .Values.db.user }}:{{ .Values.db.password }}@{{ .Release.Name }}-db:{{ .Values.db.port }}/{{ .Values.db.name }}"
+            - name: JWT_SECRET_KEY
+              value: "your-secret-key"
+            - name: SECRET_KEY
+              value: "your-secret-key"
+            - name: ALLOWED_ORIGINS
+              value: "*"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}-auth
+spec:
+  type: {{ .Values.auth.serviceType }}
+  ports:
+    - port: {{ .Values.auth.port }}
+      targetPort: {{ .Values.auth.port }}
+  selector:
+    app: {{ .Release.Name }}-auth

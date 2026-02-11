@@ -15,12 +15,12 @@ import argparse
 def main():
     parser = argparse.ArgumentParser(description='Start the Backend Service')
     parser.add_argument('--host', default='0.0.0.0', help='Host to bind to (default: 0.0.0.0)')
-    parser.add_argument('--port', type=int, default=8000, help='Port to bind to (default: 8000)')
+    parser.add_argument('--port', type=int, default=7860, help='Port to bind to (default: 7860)')
     parser.add_argument('--reload', action='store_true', help='Enable auto-reload (development)')
 
     args = parser.parse_args()
 
-    print("Starting Backend Service on port 8000...")
+    print("Starting Backend Service on port 7860...")
 
     # Start the Uvicorn server
     uvicorn.run(

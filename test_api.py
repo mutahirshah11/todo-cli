@@ -31,8 +31,7 @@ def test_api_endpoints():
 
     print("[OK] API endpoints created successfully!")
     print("\nTo run the API server, use:")
-    print("  uvicorn main:app --reload --port 8000")
-    print("\nThe following endpoints are available:")
+            print("  uvicorn main:app --reload --port 7860")    print("\nThe following endpoints are available:")
     print("  GET    /api/v1/{user_id}/tasks          - List all tasks for a user")
     print("  GET    /api/v1/{user_id}/tasks/{id}     - Get details of a single task")
     print("  POST   /api/v1/{user_id}/tasks          - Create a new task")

@@ -1,23 +1,57 @@
 version: '3.8'
 
 services:
-  api:
-    build: .
-    ports:
-      - "8000:8000"
-    volumes:
-      - .:/app
-      - todo_data_volume:/app/todo_data.json
+  db:
+    image: postgres:15-alpine
+    container_name: project-db
+    restart: always
     environment:
-      - JWT_SECRET_KEY=${JWT_SECRET_KEY:-your-super-secret-key-change-in-production}
-      - JWT_ALGORITHM=${JWT_ALGORITHM:-HS256}
-      - ACCESS_TOKEN_EXPIRE_MINUTES=${ACCESS_TOKEN_EXPIRE_MINUTES:-30}
-      - TODO_STORAGE_FILE=${TODO_STORAGE_FILE:-todo_data.json}
-      - ALLOWED_ORIGINS=${ALLOWED_ORIGINS:-*}
-      - LOG_LEVEL=${LOG_LEVEL:-INFO}
-    env_file:
-      - .env
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=todo_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  auth:
+    image: project-auth
+    container_name: project-auth-container
+    ports:
+      - "8001:8001"
+    environment:
+      - DATABASE_URL=postgresql://postgres:postgres@db:5432/todo_db
+      - JWT_SECRET_KEY=your-secret-key
+      - ALLOWED_ORIGINS=http://localhost:3000
+    depends_on:
+      - db
+    restart: unless-stopped
+
+  backend:
+    image: project-backend
+    container_name: project-backend-container
+    ports:
+      - "7860:7860"
+    environment:
+      - NEON_DATABASE_URL=postgresql://postgres:postgres@db:5432/todo_db
+      - JWT_SECRET_KEY=your-secret-key
+      - ALLOWED_ORIGINS=http://localhost:3000
+    depends_on:
+      - db
+    restart: unless-stopped
+
+  frontend:
+    image: project-frontend
+    container_name: project-frontend-container
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:7860
+      - NEXT_PUBLIC_AUTH_URL=http://localhost:8001
+    depends_on:
+      - backend
+      - auth
     restart: unless-stopped
 
 volumes:
-  todo_data_volume:
+  postgres_data:

@@ -25,8 +25,8 @@ RUN pip install --no-cache-dir --upgrade pip && \
 # Copy the rest of the application code
 COPY --chown=user:user . .
 
-# Set Python Path to include root
-ENV PYTHONPATH=/app
+# Set Python Path to include root and backend directory for imports
+ENV PYTHONPATH=/app:/app/backend
 
 # Hugging Face Spaces use port 7860 by default
 EXPOSE 7860

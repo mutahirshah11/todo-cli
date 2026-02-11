@@ -1,0 +1,35 @@
+# Global settings
+replicaCount: 1
+
+imagePullPolicy: IfNotPresent
+
+# Database Configuration
+db:
+  image: postgres
+  tag: 15-alpine
+  port: 5432
+  user: postgres
+  password: postgres
+  name: todo_db
+  storage: 1Gi
+
+# Backend Configuration
+backend:
+  image: project-backend
+  tag: latest
+  port: 7860
+  serviceType: ClusterIP
+
+# Auth Configuration
+auth:
+  image: project-auth
+  tag: latest
+  port: 8001
+  serviceType: ClusterIP
+
+# Frontend Configuration
+frontend:
+  image: project-frontend
+  tag: latest
+  port: 3000
+  serviceType: LoadBalancer # Changed to LoadBalancer so you can access it easily
