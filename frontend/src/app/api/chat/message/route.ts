@@ -16,7 +16,7 @@ export async function POST(req: Request) {
     }
 
     // Call the actual FastAPI backend
-    const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:7860';
+    const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:7860';
     // Remove trailing slash if present
     const cleanBaseUrl = baseUrl.endsWith('/') ? baseUrl.slice(0, -1) : baseUrl;
     // Construct URL: Check if base url already has /api/v1

@@ -74,6 +74,12 @@ async def process_request(message: str, history: List[Dict[str, Any]], user_id: 
         
         return result.final_output
     except Exception as e:
-        logger.error(f"Error in process_request: {str(e)}", exc_info=True)
-        log_debug(f"CORE ERROR: {str(e)}")
-        return f"Error: {str(e)}"
+        error_msg = str(e)
+        logger.error(f"Error in process_request: {error_msg}", exc_info=True)
+        log_debug(f"CORE ERROR: {error_msg}")
+        
+        # Friendly handling for Rate Limits (Quota)
+        if "429" in error_msg or "quota" in error_msg.lower():
+            return "⚠️ System Busy: My AI brain (Gemini) has reached its free usage limit for today. Please try again in a few minutes or check your API quota."
+            
+        return f"Error: {error_msg}"

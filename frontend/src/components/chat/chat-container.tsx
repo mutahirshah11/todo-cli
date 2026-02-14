@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { Loader2, Send, User, Bot, Sparkles } from "lucide-react";
 import { useAuthContext } from "@/app/providers/auth-provider";
+import { useStore } from "@/lib/store";
 
 interface Message {
   role: "user" | "assistant";
@@ -13,6 +14,7 @@ interface Message {
 
 export function ChatContainer({ isFloating }: { isFloating?: boolean }) {
   const { user, isAuthenticated } = useAuthContext();
+  const { fetchTasks } = useStore();
   const [messages, setMessages] = useState<Message[]>([
     { role: "assistant", content: "Hello! I'm your AI Task Assistant. I can help you add, remove, and manage your tasks. Just ask me!" }
   ]);
@@ -67,6 +69,9 @@ export function ChatContainer({ isFloating }: { isFloating?: boolean }) {
 
       const data = await res.json();
       setMessages((prev) => [...prev, { role: "assistant", content: data.response }]);
+      
+      // Refresh tasks after AI action to sync dashboard
+      fetchTasks();
     } catch (error) {
       console.error("Chat error:", error);
       toast.error("AI is busy right now");

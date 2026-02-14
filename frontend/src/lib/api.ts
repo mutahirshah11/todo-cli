@@ -20,7 +20,7 @@ class ApiClient {
     // Use the correct API path format that matches the backend: /api/v1/{endpoint}
     // The user_id is now extracted from the JWT token, not from the URL path
     // Check if NEXT_PUBLIC_API_URL already includes the /api/v1 part
-    const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+    const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:7860';
     
     // Remove trailing slash if present
     const cleanBaseUrl = baseUrl.endsWith('/') ? baseUrl.slice(0, -1) : baseUrl;
